@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum RestTemplateConfigType implements CommonEnumCode<String> {
+public enum RestConfigType implements CommonEnumCode<String> {
 
   NONE("NONE", "NONE"),
   LOGGING("LOGGING", "LOGGING"),
