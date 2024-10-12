@@ -32,6 +32,7 @@ public class ObjectMapperConfigurer {
         .featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
         .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         .featuresToEnable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+        .featuresToEnable(SerializationFeature.INDENT_OUTPUT)
         .featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         .modules(new JavaTimeModule(), new Jdk8Module());
   }
