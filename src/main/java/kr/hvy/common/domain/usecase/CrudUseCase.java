@@ -8,7 +8,7 @@ public interface CrudUseCase<T, R, C, U, ID> {
     throw new UnsupportedOperationException("Create operation not supported");
   }
 
-  default R update(U updateDto) {
+  default R update(ID id, U updateDto) {
     throw new UnsupportedOperationException("Update operation not supported");
   }
 
