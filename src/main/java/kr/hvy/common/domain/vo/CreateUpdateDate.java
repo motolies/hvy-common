@@ -10,19 +10,16 @@ import lombok.With;
 @Builder
 @With
 public class CreateUpdateDate {
-  LocalDateTime createDate;
-  LocalDateTime updateDate;
 
-  // 기본값을 설정하는 메서드
+  @Builder.Default
+  LocalDateTime createDate = LocalDateTime.now();
+  @Builder.Default
+  LocalDateTime updateDate = LocalDateTime.now();
+
   public static CreateUpdateDate defaultValues() {
     return CreateUpdateDate.builder()
         .createDate(LocalDateTime.now())
         .updateDate(LocalDateTime.now())
         .build();
-  }
-
-  // 업데이트 메서드
-  public CreateUpdateDate updated() {
-    return this.withUpdateDate(LocalDateTime.now());
   }
 }
