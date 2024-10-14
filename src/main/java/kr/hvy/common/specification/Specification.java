@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import kr.hvy.common.exception.SpecificationException;
+import org.apache.commons.collections4.CollectionUtils;
 
 public interface Specification<T> {
 
@@ -24,7 +25,7 @@ public interface Specification<T> {
 
   default void validateException(T t) throws SpecificationException {
     if (!isSatisfiedBy(t)) {
-      throw new SpecificationException("Specification is not satisfied.");
+      throw new SpecificationException(getErrorMessage());
     }
   }
 
@@ -49,15 +50,16 @@ public interface Specification<T> {
    * @return the optional
    */
   default Optional<List<String>> validateOptionalMessages(T t) {
-    List<String> errors = new ArrayList<>();
-    collectErrors(t, errors);
-    return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
+    List<String> errors = collectErrors(t);
+    return CollectionUtils.isEmpty(errors)? Optional.empty() : Optional.of(errors);
   }
 
-  default void collectErrors(T t, List<String> errors) {
+  default List<String> collectErrors(T t) {
+    List<String> errors = new ArrayList<>();
     if (!isSatisfiedBy(t)) {
       errors.add(getErrorMessage());
     }
+    return errors;
   }
 
   default String getErrorMessage() {

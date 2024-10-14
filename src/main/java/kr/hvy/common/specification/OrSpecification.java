@@ -1,7 +1,11 @@
 package kr.hvy.common.specification;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import kr.hvy.common.exception.SpecificationException;
+import org.apache.commons.collections4.CollectionUtils;
 
 public class OrSpecification<T> implements Specification<T> {
 
@@ -20,19 +24,26 @@ public class OrSpecification<T> implements Specification<T> {
 
   @Override
   public void validateException(T t) throws SpecificationException {
-    if(!(spec1.isSatisfiedBy(t) || spec2.isSatisfiedBy(t))){
-      throw new SpecificationException(getErrorMessage());
+    if (!(spec1.isSatisfiedBy(t) || spec2.isSatisfiedBy(t))) {
+      List<String> errors = collectErrors(t);
+      String errorMsg = Optional.ofNullable(errors)
+          .map(errList -> errList.stream().collect(Collectors.joining(", ")))
+          .orElse(getErrorMessage());
+
+      throw new SpecificationException(errorMsg);
     }
   }
 
   @Override
-  public void collectErrors(T t, List<String> errors) {
+  public List<String> collectErrors(T t) {
+    List<String> errors = new ArrayList<>();
     if (!spec1.isSatisfiedBy(t)) {
-      spec1.collectErrors(t, errors);
+      errors.addAll(spec1.collectErrors(t));
     }
     if (!spec2.isSatisfiedBy(t)) {
-      spec2.collectErrors(t, errors);
+      errors.addAll(spec2.collectErrors(t));
     }
+    return errors;
   }
 
   @Override

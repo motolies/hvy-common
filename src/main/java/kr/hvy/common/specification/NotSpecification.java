@@ -1,6 +1,9 @@
 package kr.hvy.common.specification;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import kr.hvy.common.exception.SpecificationException;
 
 public class NotSpecification<T> implements Specification<T> {
@@ -18,16 +21,21 @@ public class NotSpecification<T> implements Specification<T> {
 
   @Override
   public void validateException(T t) throws SpecificationException {
-    if(!(!spec.isSatisfiedBy(t))){
+    if (!(!spec.isSatisfiedBy(t))) {
+      List<String> errors = collectErrors(t);
+      String errorMsg = Optional.ofNullable(errors)
+          .map(errList -> errList.stream().collect(Collectors.joining(", ")))
+          .orElse(getErrorMessage());
+
       throw new SpecificationException(getErrorMessage());
     }
   }
 
   @Override
-  public void collectErrors(T t, List<String> errors) {
-    if (spec.isSatisfiedBy(t)) {
-      errors.add("NotSpecification is not satisfied.");
-    }
+  public List<String> collectErrors(T t) {
+    List<String> errors = new ArrayList<>();
+    errors.addAll(spec.collectErrors(t));
+    return errors;
   }
 
   @Override
