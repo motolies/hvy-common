@@ -22,6 +22,9 @@ public interface Specification<T> {
     return new NotSpecification<>(this);
   }
 
+  static <T> Specification<T> not(Specification<T> spec) {
+    return spec.not();
+  }
 
   default void validateException(T t) throws SpecificationException {
     if (!isSatisfiedBy(t)) {
