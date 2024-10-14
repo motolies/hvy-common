@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import kr.hvy.common.exception.SpecificationException;
+import org.springframework.util.CollectionUtils;
 
 public class NotSpecification<T> implements Specification<T> {
 
@@ -23,11 +24,10 @@ public class NotSpecification<T> implements Specification<T> {
   public void validateException(T t) throws SpecificationException {
     if (!(!spec.isSatisfiedBy(t))) {
       List<String> errors = collectErrors(t);
-      String errorMsg = Optional.ofNullable(errors)
-          .map(errList -> errList.stream().collect(Collectors.joining(", ")))
-          .orElse(getErrorMessage());
-
-      throw new SpecificationException(getErrorMessage());
+      if (CollectionUtils.isEmpty(errors)) {
+        errors.add(getErrorMessage());
+      }
+      throw new SpecificationException(errors);
     }
   }
 
