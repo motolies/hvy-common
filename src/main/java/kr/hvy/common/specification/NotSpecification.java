@@ -1,6 +1,7 @@
 package kr.hvy.common.specification;
 
 import java.util.List;
+import kr.hvy.common.exception.SpecificationException;
 
 public class NotSpecification<T> implements Specification<T> {
 
@@ -13,6 +14,13 @@ public class NotSpecification<T> implements Specification<T> {
   @Override
   public boolean isSatisfiedBy(T t) {
     return !spec.isSatisfiedBy(t);
+  }
+
+  @Override
+  public void validateException(T t) throws SpecificationException {
+    if(!(!spec.isSatisfiedBy(t))){
+      throw new SpecificationException(getErrorMessage());
+    }
   }
 
   @Override

@@ -3,6 +3,7 @@ package kr.hvy.common.specification;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import kr.hvy.common.exception.SpecificationException;
 
 public interface Specification<T> {
 
@@ -20,6 +21,13 @@ public interface Specification<T> {
     return new NotSpecification<>(this);
   }
 
+
+  default void validateException(T t) throws SpecificationException {
+    if (!isSatisfiedBy(t)) {
+      throw new SpecificationException("Specification is not satisfied.");
+    }
+  }
+
   /**
    * 만족 여부와 관계없이 검증에 따른 오류 메시지 수집
    * <pre>
@@ -28,7 +36,7 @@ public interface Specification<T> {
    *                                   .and(new AnotherSpecification())
    *                                   .or(new YetAnotherSpecification());
    *
-   *   spec.validateOptional(user).ifPresent(errors -> {
+   *   spec.validateOptionalMessages(user).ifPresent(errors -> {
    *       String errorMessage = String.join(", ", errors);
    *       throw new SpecificationException(errorMessage);
    *   });
@@ -40,7 +48,7 @@ public interface Specification<T> {
    * @param t the t
    * @return the optional
    */
-  default Optional<List<String>> validateOptional(T t) {
+  default Optional<List<String>> validateOptionalMessages(T t) {
     List<String> errors = new ArrayList<>();
     collectErrors(t, errors);
     return errors.isEmpty() ? Optional.empty() : Optional.of(errors);
