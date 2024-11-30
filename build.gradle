@@ -18,6 +18,7 @@ java {
 }
 
 tasks.withType(Javadoc) {
+	exclude 'kr/hvy/common/domain/mapper/**' // 제외할 패키지 경로
 	options {
 		encoding 'UTF-8'
 	}
@@ -93,19 +94,21 @@ dependencies {
 	implementation "org.springframework.session:spring-session-data-redis"
 	implementation 'org.apache.commons:commons-lang3:3.17.0'
 	implementation 'org.apache.httpcomponents.client5:httpclient5:5.4'
-	implementation 'org.mapstruct:mapstruct:1.6.2'
-
 	implementation 'org.apache.commons:commons-lang3:3.17.0'
 	implementation 'org.apache.commons:commons-collections4:4.5.0-M2'
-
 	implementation 'org.redisson:redisson-spring-boot-starter:3.38.1'
 
 
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2' // mapstruct가 lombok 뒤에 있어야 함?
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// mapStruct
+	implementation 'org.mapstruct:mapstruct:1.6.2'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2' // mapstruct가 lombok 뒤에 있어야 함?
 	testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2'
 
 }
