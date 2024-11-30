@@ -12,7 +12,7 @@ public interface CrudUseCase<T, R, C, U, ID> {
     throw new UnsupportedOperationException("Update operation not supported");
   }
 
-  default void delete(ID id) {
+  default ID delete(ID id) {
     throw new UnsupportedOperationException("Delete operation not supported");
   }
 
