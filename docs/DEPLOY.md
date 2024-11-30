@@ -46,6 +46,9 @@ signing.keyId=ABCD1234
 signing.password=gpg+key+password
 # gpg export 한 파일 절대경로 ex) C:/dev/signing.gpg
 signing.secretKeyRingFile=/Users/nwkim/.gnupg/signing.gpg
+
+## 버전관리
+publishVersion=1.0.0
 ```
 
 ## 3. Build And Publish
@@ -54,6 +57,9 @@ signing.secretKeyRingFile=/Users/nwkim/.gnupg/signing.gpg
 이 때 Maven Central 사이트에 가서 Publish 버튼을 눌러줘야 실제로 다른 사람이 가져다 사용할 수 있다.
 ```shell
  ./gradlew publishAllPublicationsToMavenCentralRepository
+ 
+ # 아래처럼 버전을 추가해야 한다
+ ./gradlew publishAllPublicationsToMavenCentralRepository -PpublishVersion=1.0.0
 ```
 
 
@@ -88,6 +94,9 @@ gpg --decrypt private_key.asc.gpg > private_key.asc
 
 # 비밀키 복원
 gpg --import private_key.asc
+
+# singing.gpg 파일 생성
+gpg --export-secret-keys ABCDEF1234567890 > signing.gpg
 ```
 
 - [가져온 키 확인 및 오류 해결](https://rainbow-flavor.tistory.com/11)
@@ -100,7 +109,7 @@ gpg: signing failed: Inappropriate ioctl for device
 gpg: [stdin]: clear-sign failed: Inappropriate ioctl for device
 
 # .zshrc 파일 혹은 .bashrc 파일에 다음 줄을 추가 후 다시 명령을 실행해줍니다.
-export GPG_TTY=$(tty)
+echo 'export GPG_TTY=$(tty)' >> ~/.zshrc
 
 # 다시 명령을 실행해봅니다.
 # 정상적으로 실행이 되면 PassPhrase를 입력하라고 나올 것입니다.
