@@ -14,14 +14,14 @@ public class SecurityUtils {
   /**
    * 현재 인증된 사용자의 사용자 이름을 반환합니다.
    *
-   * @return 사용자 이름, 익명 사용자의 경우 null, 인증되지 않은 경우 null
+   * @return 사용자 이름, 익명 사용자의 경우 anonymousUser, 인증되지 않은 경우 anonymousUser
    */
   public static String getUsername() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     if (authentication == null || !authentication.isAuthenticated() ||
         authentication instanceof AnonymousAuthenticationToken) {
-      return null;
+      return "anonymousUser";
     }
 
     Object principal = authentication.getPrincipal();
@@ -32,7 +32,7 @@ public class SecurityUtils {
       return (String) principal;
     }
 
-    return null;
+    return "anonymousUser";
   }
 
   /**

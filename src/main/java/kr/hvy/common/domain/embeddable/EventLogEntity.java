@@ -1,5 +1,6 @@
 package kr.hvy.common.domain.embeddable;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -12,21 +13,21 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateUpdateDateEntity {
-  private LocalDateTime createDate;
-  private LocalDateTime updateDate;
+public class EventLogEntity {
+
+  private LocalDateTime at;
+  private String by;
 
   // 기본값을 설정하는 메서드
-  public static CreateUpdateDateEntity defaultValues() {
-    return CreateUpdateDateEntity.builder()
-        .createDate(LocalDateTime.now())
-        .updateDate(LocalDateTime.now())
+  public static EventLogEntity defaultValues() {
+    return EventLogEntity.builder()
+        .at(LocalDateTime.now())
         .build();
   }
 
   // 업데이트 메서드
-  public CreateUpdateDateEntity updated() {
-    this.updateDate = LocalDateTime.now();
+  public EventLogEntity updated() {
+    this.at = LocalDateTime.now();
     return this;
   }
 }
