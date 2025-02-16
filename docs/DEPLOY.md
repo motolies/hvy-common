@@ -62,6 +62,13 @@ publishVersion=1.0.0
  ./gradlew publishAllPublicationsToMavenCentralRepository -PpublishVersion=1.0.0
 ```
 
+### 3.1
+나는 gradle.properties 파일을 사용하고 있다.
+```properties
+# 아래에 실제 배포 버전을 적는다
+# 단 로컬에서는 주석처리 하고 실행한다. 
+publishVersion=1.0.0
+```
 
 ## 4. gpg 키 백업 및 복원
 
