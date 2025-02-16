@@ -1,135 +1,144 @@
-import com.vanniktech.maven.publish.SonatypeHost // import 꼭 해주세요
+import com.vanniktech.maven.publish.SonatypeHost
+
+// import 꼭 해주세요
 
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.3.4'
-	id 'io.spring.dependency-management' version '1.1.6'
-	id "com.vanniktech.maven.publish" version "0.28.0" // 대체 플러그인
-	id 'signing' // GPG 서명을 위한 플러그인 추가
+    id 'java'
+    id 'java-library'
+
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.1.6'
+    id "com.vanniktech.maven.publish" version "0.28.0" // 대체 플러그인
+    id 'signing' // GPG 서명을 위한 플러그인 추가
 }
 
 group = 'kr.hvy'
 version = project.findProperty('publishVersion') ?: ''
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 tasks.withType(Javadoc) {
-	exclude 'kr/hvy/common/domain/mapper/**' // 제외할 패키지 경로
-	options {
-		encoding 'UTF-8'
-	}
+    exclude 'kr/hvy/common/domain/mapper/**' // 제외할 패키지 경로
+    options {
+        encoding 'UTF-8'
+    }
 }
 
 signing {
-	sign publishing.publications
+    sign publishing.publications
 }
 
 
 // Maven Publishing 블록 설정
 mavenPublishing {
-	signAllPublications() // Gpg 서명을 위한 설정
-	publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL) // 포탈로 등록 할거기 때문에 타입 추가
+    signAllPublications() // Gpg 서명을 위한 설정
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL) // 포탈로 등록 할거기 때문에 타입 추가
 
-	coordinates("io.github.motolies", "hvy-common", version as String) // 네임 스페이스, 라이브러리 이름, 버전 순서로 작성
+    coordinates("io.github.motolies", "hvy-common", version as String) // 네임 스페이스, 라이브러리 이름, 버전 순서로 작성
 
-	// POM 설정
-	pom {
-		/**
-		 name = '[라이브러리 이름]'
-		 description = '[라이브러리 설명]'
-		 url = '[오픈소스 Repository Url]'
-		 */
-		name = 'hvy-common'
-		description = 'A collection of common codes for me'
-		url = '<https://github.com/motolies/hvy-common>'
+    // POM 설정
+    pom {
+        /**
+         name = '[라이브러리 이름]'
+         description = '[라이브러리 설명]'
+         url = '[오픈소스 Repository Url]'
+         */
+        name = 'hvy-common'
+        description = 'A collection of common codes for me'
+        url = '<https://github.com/motolies/hvy-common>'
 
-		// 라이선스 정보
-		licenses {
-			license {
-				name = 'MIT License'
-				url = '<https://opensource.org/license/mit/>'
-			}
-		}
+        // 라이선스 정보
+        licenses {
+            license {
+                name = 'MIT License'
+                url = '<https://opensource.org/license/mit/>'
+            }
+        }
 
-		// 개발자 정보
-		developers {
-			developer {
-				id = 'motolies'
-				name = 'Namwon Kim'
-				email = 'knw1234@gmail.com'
-			}
-		}
+        // 개발자 정보
+        developers {
+            developer {
+                id = 'motolies'
+                name = 'Namwon Kim'
+                email = 'knw1234@gmail.com'
+            }
+        }
 
-		/**
-		 connection = 'scm:git:github.com/[Github 사용자명]/[오픈소스 Repository 이름].git'
-		 developerConnection = 'scm:git:ssh://github.com/[Github 사용자명]/[오픈소스 Repository 이름].git'
-		 url = '<https://github.com/>[Github 사용자명]/[오픈소스 Repository 이름]/tree/[배포 브랜치명]'
-		 */
-		scm {
-			connection = 'scm:git:github.com/motolies/hvy-common.git'
-			developerConnection = 'scm:git:ssh://github.com:motolies/hvy-common.git'
-			url = '<https://github.com/motolies/hvy-common/tree/master>'
-		}
-	}
+        /**
+         connection = 'scm:git:github.com/[Github 사용자명]/[오픈소스 Repository 이름].git'
+         developerConnection = 'scm:git:ssh://github.com/[Github 사용자명]/[오픈소스 Repository 이름].git'
+         url = '<https://github.com/>[Github 사용자명]/[오픈소스 Repository 이름]/tree/[배포 브랜치명]'
+         */
+        scm {
+            connection = 'scm:git:github.com/motolies/hvy-common.git'
+            developerConnection = 'scm:git:ssh://github.com:motolies/hvy-common.git'
+            url = '<https://github.com/motolies/hvy-common/tree/master>'
+        }
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.security:spring-security-core'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation "org.springframework.session:spring-session-data-redis"
-	implementation 'org.apache.commons:commons-lang3:3.17.0'
-	implementation 'org.apache.httpcomponents.client5:httpclient5:5.4'
-	implementation 'org.apache.commons:commons-lang3:3.17.0'
-	implementation 'org.apache.commons:commons-collections4:4.5.0-M2'
-	implementation 'org.redisson:redisson-spring-boot-starter:3.38.1'
-	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.security:spring-security-core'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation "org.springframework.session:spring-session-data-redis"
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.4'
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
+    implementation 'org.apache.commons:commons-collections4:4.5.0-M2'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.38.1'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+
+    // implementation 대신 api를 사용하면 다른 모듈에서도 사용 가능
+    // tsid
+    api 'io.hypersistence:hypersistence-utils-hibernate-60:3.9.0'
 
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+    // lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
-	// mapStruct
-	implementation 'org.mapstruct:mapstruct:1.6.2'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2' // mapstruct가 lombok 뒤에 있어야 함?
-	testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2'
+    // mapStruct
+    // mapstruct가 lombok 뒤에 있어야 함
+    implementation 'org.mapstruct:mapstruct:1.6.2'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2' // mapstruct가 lombok 뒤에 있어야 함?
+    testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2'
 
 }
 
 tasks.withType(JavaCompile) {
-	options.annotationProcessorPath = configurations.annotationProcessor
+    options.annotationProcessorPath = configurations.annotationProcessor
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 // bootJar 비활성화
 tasks.named('bootJar') {
-	enabled = false
+    enabled = false
 }
 
 // 일반 JAR 빌드를 위한 설정
 tasks.named('jar') {
-	enabled = true
-	archiveBaseName = 'hvy-common'
-	archiveVersion = project.version
+    enabled = true
+    archiveBaseName = 'hvy-common'
+    archiveVersion = project.version
 }
