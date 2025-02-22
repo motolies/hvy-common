@@ -1,4 +1,4 @@
-package kr.hvy.common.mapper;
+package kr.hvy.common.config;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.DeserializationFeature;

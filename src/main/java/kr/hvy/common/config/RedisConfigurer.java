@@ -1,6 +1,5 @@
 package kr.hvy.common.config;
 
-import kr.hvy.common.mapper.ObjectMapperConfigurer;
 import lombok.RequiredArgsConstructor;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;

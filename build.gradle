@@ -96,12 +96,12 @@ dependencies {
     implementation 'org.springframework.security:spring-security-core'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.springframework.session:spring-session-data-redis"
-    implementation 'org.apache.commons:commons-lang3:3.17.0'
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.4'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    implementation 'com.slack.api:bolt:1.45.3'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.44.0'
     implementation 'org.apache.commons:commons-lang3:3.17.0'
     implementation 'org.apache.commons:commons-collections4:4.5.0-M2'
-    implementation 'org.redisson:redisson-spring-boot-starter:3.38.1'
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
 
     // implementation 대신 api를 사용하면 다른 모듈에서도 사용 가능
     // tsid
