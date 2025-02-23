@@ -1,4 +1,4 @@
-package kr.hvy.common.code.converter;
+package kr.hvy.common.domain.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

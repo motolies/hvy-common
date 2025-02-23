@@ -1,11 +1,12 @@
 package kr.hvy.common.code;
 
+import kr.hvy.common.code.base.EnumCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum RestConfigType implements CommonEnumCode<String> {
+public enum RestConfigType implements EnumCode<String> {
 
   NONE("NONE", "NONE"),
   LOGGING("LOGGING", "LOGGING"),

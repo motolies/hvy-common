@@ -1,12 +1,12 @@
 package kr.hvy.common.code;
 
+import kr.hvy.common.code.base.EnumCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 @AllArgsConstructor
-public enum ResponseStatus implements CommonEnumCode<String> {
+public enum ResponseStatus implements EnumCode<String> {
 
   SUCCESS("SUCCESS", "성공"),
   FAIL("FAIL", "실패");
