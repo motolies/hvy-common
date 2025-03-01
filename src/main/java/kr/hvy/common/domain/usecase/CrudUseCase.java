@@ -1,8 +1,9 @@
 package kr.hvy.common.domain.usecase;
 
 import java.util.List;
+import kr.hvy.common.domain.dto.DeleteResponse;
 
-public interface CrudUseCase<T, R, C, U, ID> {
+public interface CrudUseCase<T, R, C, U, ID, DR extends DeleteResponse<ID>> {
 
   default R create(C createDto) {
     throw new UnsupportedOperationException("Create operation not supported");
@@ -12,7 +13,7 @@ public interface CrudUseCase<T, R, C, U, ID> {
     throw new UnsupportedOperationException("Update operation not supported");
   }
 
-  default ID delete(ID id) {
+  default DR delete(ID id) {
     throw new UnsupportedOperationException("Delete operation not supported");
   }
 
