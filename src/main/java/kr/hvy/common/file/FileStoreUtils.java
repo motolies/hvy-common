@@ -101,9 +101,21 @@ public class FileStoreUtils {
 
   public static void deleteFile(String uploadPath, String fileName) {
     File file = new File(uploadPath + File.separatorChar + fileName);
+    log.debug("Attempting to delete file: {}", file.getAbsolutePath());
+
+    if (!file.exists()) {
+      log.info("File does not exist: {}", file.getAbsolutePath());
+      return;
+    }
+
     if (!file.delete()) {
-      log.error("Failed to delete file");
-      throw new IllegalStateException("Failed to delete file");
+      log.error("Failed to delete file: {}", file.getAbsolutePath());
+      if (!file.canWrite()) {
+        log.error("File is not writable");
+      }
+      throw new IllegalStateException("Failed to delete file: " + file.getAbsolutePath());
+    } else {
+      log.debug("File deleted successfully: {}", file.getAbsolutePath());
     }
   }
 
