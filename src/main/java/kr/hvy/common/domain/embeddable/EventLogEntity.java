@@ -3,6 +3,7 @@ package kr.hvy.common.domain.embeddable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDateTime;
+import kr.hvy.common.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class EventLogEntity {
   public static EventLogEntity defaultValues() {
     return EventLogEntity.builder()
         .at(LocalDateTime.now())
+        .by(SecurityUtils.getUsername())
         .build();
   }
 
