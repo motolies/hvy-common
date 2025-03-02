@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum ResponseStatus implements EnumCode<String> {
+public enum ApiResponseStatus implements EnumCode<String> {
 
   SUCCESS("SUCCESS", "성공"),
   FAIL("FAIL", "실패");

@@ -1,12 +1,11 @@
 package kr.hvy.common.advice.dto;
 
 import java.time.LocalDateTime;
-import kr.hvy.common.code.ResponseStatus;
+import kr.hvy.common.code.ApiResponseStatus;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.With;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @Builder
@@ -16,7 +15,7 @@ public class ApiResponse<T> {
   private final LocalDateTime timestamp = LocalDateTime.now();
   private String path;
   @NonNull
-  private ResponseStatus status;
+  private ApiResponseStatus status;
   private String message;
   private T data;
 }

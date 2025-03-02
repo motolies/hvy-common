@@ -107,7 +107,6 @@ dependencies {
     // tsid
     api 'io.hypersistence:hypersistence-utils-hibernate-60:3.9.0'
 
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
