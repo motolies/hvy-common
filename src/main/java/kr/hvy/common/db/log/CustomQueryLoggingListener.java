@@ -1,14 +1,16 @@
 package kr.hvy.common.db.log;
 
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.listener.QueryExecutionListener;
 import net.ttddyy.dsproxy.listener.logging.QueryLogEntryCreator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-@Slf4j
 public class CustomQueryLoggingListener implements QueryExecutionListener {
+
+  protected Log log = LogFactory.getLog(CustomQueryLoggingListener.class);
 
   private final DataSourceProxySettingProperty property;
   protected QueryLogEntryCreator queryLogEntryCreator;
