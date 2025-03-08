@@ -102,6 +102,7 @@ dependencies {
     implementation 'org.redisson:redisson-spring-boot-starter:3.44.0'
     implementation 'org.apache.commons:commons-lang3:3.17.0'
     implementation 'org.apache.commons:commons-collections4:4.5.0-M2'
+    implementation 'net.ttddyy:datasource-proxy:1.10.1'
 
     // implementation 대신 api를 사용하면 다른 모듈에서도 사용 가능
     // tsid
