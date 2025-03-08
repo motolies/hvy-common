@@ -22,6 +22,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.CodeSignature;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -29,11 +31,11 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Slf4j
+@Profile("prod")
 @Aspect
 @Component
 @RequiredArgsConstructor
 public class SystemLogAspect {
-
 
   private final ObjectMapper objectMapper;
   private final SystemLogService systemLogService;
@@ -69,7 +71,7 @@ public class SystemLogAspect {
         .methodName(joinPoint.getSignature().getName())
         .httpMethodType(request.getMethod())
         .paramData(getMethodParameter(joinPoint))
-        .remoteAddr(request.getRemoteAddr())
+        .remoteAddr(getRemoteAddr(request))
         .created(EventLog.builder()
             .at(requestTime)
             .by(SecurityUtils.getUsername())
@@ -86,6 +88,14 @@ public class SystemLogAspect {
     }
 
     systemLogService.save(systemLogCreateBuilder.build());
+  }
+
+  private String getRemoteAddr(HttpServletRequest request) {
+    String remoteAddr = request.getHeader("X-Forwarded-For");
+    if (remoteAddr == null) {
+      remoteAddr = request.getRemoteAddr();
+    }
+    return remoteAddr;
   }
 
   private String getMethodParameter(ProceedingJoinPoint joinPoint) {
