@@ -4,12 +4,14 @@ import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import java.sql.Timestamp;
+import kr.hvy.common.code.ApiResponseStatus;
+import kr.hvy.common.code.converter.ApiResponseStatusConverter;
 import kr.hvy.common.domain.embeddable.EventLogEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,11 +51,18 @@ public class SystemLogEntity {
   @Column(columnDefinition = "TEXT")
   private String responseBody;
 
+  @Column(columnDefinition = "TEXT")
+  private String stackTrace;
+
   @Column(length = 64)
   private String remoteAddr;
 
   @Column
   private Long processTime;
+
+  @Convert(converter = ApiResponseStatusConverter.class)
+  @Column(length = 4, nullable = false)
+  private ApiResponseStatus status;
 
   @Embedded
   @AttributeOverrides({

@@ -2,6 +2,7 @@ package kr.hvy.common.db.log;
 
 
 import java.util.List;
+import java.util.regex.Matcher;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.StatementType;
@@ -66,7 +67,7 @@ public class BoundQueryLogEntryCreator extends DefaultQueryLogEntryCreator {
         replacedValue = String.valueOf(value);
       }
       // 첫 번째 '?'만 순차적으로 교체
-      query = query.replaceFirst("\\?", replacedValue);
+      query = query.replaceFirst("\\?", Matcher.quoteReplacement(replacedValue));
     }
     return query;
   }

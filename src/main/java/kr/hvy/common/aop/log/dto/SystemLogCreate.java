@@ -1,5 +1,6 @@
 package kr.hvy.common.aop.log.dto;
 
+import kr.hvy.common.code.ApiResponseStatus;
 import kr.hvy.common.domain.vo.EventLog;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,5 +22,8 @@ public class SystemLogCreate {
   private String remoteAddr;
   private EventLog created;
   private Long processTime;
+  @Builder.Default
+  private ApiResponseStatus status = ApiResponseStatus.SUCCESS;
+  private String stackTrace;
 
 }
