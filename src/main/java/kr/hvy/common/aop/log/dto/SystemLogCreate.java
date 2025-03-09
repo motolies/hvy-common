@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SystemLogCreate {
 
+  private String traceId;
+  private String spanId;
   private String requestUri;
   private String controllerName;
   private String methodName;

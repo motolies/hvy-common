@@ -1,5 +1,6 @@
 package kr.hvy.common.aop.log;
 
+import brave.Tracer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,6 +39,7 @@ public class SystemLogAspect {
 
   private final ObjectMapper objectMapper;
   private final SystemLogService systemLogService;
+  private final Tracer tracer;
 
   @Pointcut("execution(* *..*Controller.*(..))")
   public void controllerPointcut() {
@@ -65,6 +67,8 @@ public class SystemLogAspect {
   protected void extracted(ProceedingJoinPoint joinPoint, LocalDateTime requestTime, ZonedDateTime start, Object result) {
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
     var systemLogCreateBuilder = SystemLogCreate.builder()
+        .traceId(tracer.currentSpan().context().traceIdString())
+        .spanId(tracer.currentSpan().context().spanIdString())
         .requestUri(request.getRequestURI())
         .controllerName(joinPoint.getSignature().getDeclaringTypeName())
         .methodName(joinPoint.getSignature().getName())

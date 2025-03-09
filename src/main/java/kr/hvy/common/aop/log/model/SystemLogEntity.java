@@ -24,14 +24,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "system_log", indexes = {
-    @Index(name = "idx_createdAt", columnList = "createdAt"),
-    @Index(name = "idx_requestUri", columnList = "requestUri")
+    @Index(name = "idx_system_log_traceId", columnList = "traceId"),
+    @Index(name = "idx_system_log_spanId", columnList = "spanId"),
+    @Index(name = "idx_system_log_createdAt", columnList = "createdAt"),
+    @Index(name = "idx_system_log_requestUri", columnList = "requestUri")
 })
 public class SystemLogEntity {
 
   @Id
   @Tsid
   private Long id;
+
+  @Column(length = 32)
+  private String traceId;
+
+  @Column(length = 16)
+  private String spanId;
 
   @Column(length = 1024)
   private String requestUri;
