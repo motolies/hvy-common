@@ -91,6 +91,17 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    set('springCloudVersion', "2024.0.0")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
@@ -102,6 +113,10 @@ dependencies {
     implementation 'com.slack.api:bolt:1.45.3'
     implementation 'org.redisson:redisson-spring-boot-starter:3.45.0'
     implementation 'net.ttddyy:datasource-proxy:1.10.1'
+
+    // spring cloud stream kafka
+    implementation 'org.springframework.cloud:spring-cloud-stream'
+    implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
 
     // apache commons
     implementation 'org.apache.commons:commons-lang3:3.17.0'
