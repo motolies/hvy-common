@@ -1,6 +1,14 @@
 # Spring Cloud Stream Kafka Default DLQ
 
-
+## 사용하지 않을 때 
+```yaml
+spring:
+  cloud:
+    stream:
+      kafka:
+        enabled: false # kafka 사용 여부
+```
+## 사용할 때
 ```yaml
 spring:
   application.name: dlq

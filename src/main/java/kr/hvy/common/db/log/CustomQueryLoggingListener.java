@@ -23,8 +23,6 @@ public class CustomQueryLoggingListener implements QueryExecutionListener {
   protected boolean writeDataSourceName = true;
   protected boolean writeConnectionId = true;
   protected boolean writeIsolation;
-  // 슬로우 쿼리 임계치 (ms)
-  private long slowQueryThreshold = 1000; // 예: 1000ms 이상이면 slow query로 간주
 
   @Override
   public void beforeQuery(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {
@@ -35,7 +33,7 @@ public class CustomQueryLoggingListener implements QueryExecutionListener {
   public void afterQuery(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {
     final String entry = getEntry(execInfo, queryInfoList);
     // 쿼리 실행 시간이 임계치 이상이면 warn, 그렇지 않으면 debug 로깅
-    if (execInfo.getElapsedTime() >= slowQueryThreshold) {
+    if (execInfo.getElapsedTime() >= property.getSlowQueryThreshold()) {
       log.warn("Slow Query: " + entry);
     } else {
       log.debug(entry);

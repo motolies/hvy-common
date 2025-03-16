@@ -15,10 +15,10 @@ public class DataSourceWrapperPostProcessor implements BeanPostProcessor {
 
   @Override
   public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-    if (property.isWrap() && bean instanceof DataSource && property.getNames().contains(beanName)) {
+    if (property.isEnableWrapper() && bean instanceof DataSource && property.getDataSourceNames().contains(beanName)) {
       return ProxyDataSourceBuilder
           .create((DataSource) bean)
-          .name("proxy-" + beanName.toUpperCase())
+          .name("proxy-" + beanName)
           .listener(new CustomQueryLoggingListener(property))
           .build();
     }
