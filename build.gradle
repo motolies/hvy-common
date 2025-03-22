@@ -5,7 +5,7 @@ import com.vanniktech.maven.publish.SonatypeHost
 plugins {
     id 'java'
     id 'java-library'
-
+    id 'maven-publish' // Maven Publishing 플러그인
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
     id "com.vanniktech.maven.publish" version "0.28.0" // 대체 플러그인
@@ -13,7 +13,7 @@ plugins {
 }
 
 group = 'kr.hvy'
-version = project.findProperty('publishVersion') ?: ''
+version = project.findProperty('publishVersion') ?: 'local'
 
 java {
     toolchain {
@@ -81,6 +81,43 @@ mavenPublishing {
     }
 }
 
+publishing {
+    publications {
+        localPublication(MavenPublication) {
+            groupId = 'io.github.motolies'
+            artifactId = 'hvy-common'
+            version = version as String
+            from components.java
+            pom {
+                name = 'hvy-common'
+                description = 'A collection of common codes for local debugging'
+                url = 'https://github.com/motolies/hvy-common'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/license/mit/'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'motolies'
+                        name = 'Namwon Kim'
+                        email = 'knw1234@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:github.com/motolies/hvy-common.git'
+                    developerConnection = 'scm:git:ssh://github.com:motolies/hvy-common.git'
+                    url = 'https://github.com/motolies/hvy-common/tree/master'
+                }
+            }
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -110,17 +147,24 @@ dependencies {
     implementation "org.springframework.session:spring-session-data-redis"
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.4'
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-    implementation 'com.slack.api:bolt:1.45.3'
     implementation 'org.redisson:redisson-spring-boot-starter:3.45.0'
-    implementation 'net.ttddyy:datasource-proxy:1.10.1'
 
     // spring cloud stream kafka
     api 'org.springframework.cloud:spring-cloud-stream'
     api 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
 
+
+    // slack
+    api 'com.slack.api:bolt:1.45.3'
+
+    // jdbc proxy
+    api 'net.ttddyy:datasource-proxy:1.10.1'
+
     // apache commons
     api 'org.apache.commons:commons-lang3:3.17.0'
     api 'org.apache.commons:commons-collections4:4.5.0-M2'
+    api 'org.apache.commons:commons-text:1.13.0'
+    api 'commons-io:commons-io:2.18.0'
 
     // cache
     implementation 'org.springframework.boot:spring-boot-starter-cache'
@@ -128,8 +172,7 @@ dependencies {
 
     // logging
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-tracing-bridge-brave:1.4.3'
-
+    api 'io.micrometer:micrometer-tracing-bridge-brave:1.4.3'
 
     // implementation 대신 api를 사용하면 다른 모듈에서도 사용 가능
     // tsid
