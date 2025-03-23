@@ -1,7 +1,7 @@
 package kr.hvy.common.config;
 
 import java.util.List;
-import kr.hvy.common.aop.log.ApiLogInterceptor;
+import kr.hvy.common.client.Interceptor.ApiLogInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hc.client5.http.config.RequestConfig;

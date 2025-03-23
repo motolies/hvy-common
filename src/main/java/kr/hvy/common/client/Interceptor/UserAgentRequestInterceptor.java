@@ -1,4 +1,4 @@
-package kr.hvy.common.Interceptor;
+package kr.hvy.common.client.Interceptor;
 
 import java.io.IOException;
 import java.net.URI;
