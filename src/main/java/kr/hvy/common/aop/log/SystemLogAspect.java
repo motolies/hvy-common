@@ -41,7 +41,7 @@ public class SystemLogAspect {
   private final SystemLogService systemLogService;
   private final Tracer tracer;
 
-  @Pointcut("execution(* *..*Controller.*(..))")
+  @Pointcut("execution(* kr.hvy..*Controller.*(..))")
   public void controllerPointcut() {
   }
 

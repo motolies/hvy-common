@@ -147,14 +147,12 @@ dependencies {
     implementation 'org.springframework.security:spring-security-core'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.springframework.session:spring-session-data-redis"
-    implementation 'org.apache.httpcomponents.client5:httpclient5:5.4'
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
     implementation 'org.redisson:redisson-spring-boot-starter:3.45.0'
 
     // spring cloud stream kafka
     api 'org.springframework.cloud:spring-cloud-stream'
     api 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
-
 
     // slack
     api 'com.slack.api:bolt:1.45.3'
@@ -163,6 +161,7 @@ dependencies {
     api 'net.ttddyy:datasource-proxy:1.10.1'
 
     // apache commons
+    api 'org.apache.httpcomponents.client5:httpclient5:5.4'
     api 'org.apache.commons:commons-lang3:3.17.0'
     api 'org.apache.commons:commons-collections4:4.5.0-M2'
     api 'org.apache.commons:commons-text:1.13.0'
@@ -171,6 +170,9 @@ dependencies {
     // guava
     api 'com.google.guava:guava:33.4.0-jre'
 
+    // shedlock scheduler
+    api 'net.javacrumbs.shedlock:shedlock-spring:6.3.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.3.0'
 
     // cache
     implementation 'org.springframework.boot:spring-boot-starter-cache'
@@ -201,6 +203,7 @@ dependencies {
 
 tasks.withType(JavaCompile) {
     options.annotationProcessorPath = configurations.annotationProcessor
+    options.compilerArgs += '-Xlint:deprecation'
 }
 
 tasks.named('test') {
