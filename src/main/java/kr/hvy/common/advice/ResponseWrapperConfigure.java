@@ -3,10 +3,13 @@ package kr.hvy.common.advice;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import kr.hvy.common.advice.dto.ApiResponse;
 import kr.hvy.common.advice.dto.FieldValidation;
 import kr.hvy.common.code.ApiResponseStatus;
+import kr.hvy.common.notify.Notify;
+import kr.hvy.common.notify.NotifyRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -28,10 +31,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Slf4j
 public abstract class ResponseWrapperConfigure extends ResponseEntityExceptionHandler implements ResponseBodyAdvice<Object> {
 
-  private final ObjectMapper objectMapper;
+  protected final ObjectMapper objectMapper;
+  protected final Optional<Notify> notify;
+  protected final String defaultErrorChannel;
 
-  public ResponseWrapperConfigure(ObjectMapper objectMapper) {
+  public ResponseWrapperConfigure(ObjectMapper objectMapper, Optional<Notify> notify, String defaultErrorChannel) {
     this.objectMapper = objectMapper;
+    this.notify = notify;
+    this.defaultErrorChannel = defaultErrorChannel;
   }
 
   @Override
@@ -93,6 +100,11 @@ public abstract class ResponseWrapperConfigure extends ResponseEntityExceptionHa
       }
     }
 
+    notify.ifPresent(value -> value.sendMessage(NotifyRequest.builder()
+        .channel(defaultErrorChannel)
+        .exception(ex)
+        .build()));
+
     return ResponseEntity.status(status)
         .body(ApiResponse.builder()
             .status(ApiResponseStatus.FAIL)
@@ -104,8 +116,10 @@ public abstract class ResponseWrapperConfigure extends ResponseEntityExceptionHa
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ExceptionHandler(Exception.class)
   public ApiResponse<?> handleException(Exception ex) {
-
-    // todo : slack 또는 email로 예외 발생 알림을 전송합니다.
+    notify.ifPresent(value -> value.sendMessage(NotifyRequest.builder()
+        .channel(defaultErrorChannel)
+        .exception(ex)
+        .build()));
 
     log.error("Exception : ", ex);
     return ApiResponse.builder()

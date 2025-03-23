@@ -28,13 +28,6 @@ tasks.withType(Javadoc) {
     }
 }
 
-tasks.withType(Sign).configureEach {
-    onlyIf {
-        // maven central에 배포할 때만 서명
-        gradle.taskGraph.hasTask("publishAllPublicationsToMavenCentralRepository")
-    }
-}
-
 signing {
     sign publishing.publications
 }
@@ -72,6 +65,8 @@ mavenPublishing {
                 id = 'motolies'
                 name = 'Namwon Kim'
                 email = 'knw1234@gmail.com'
+                organization = 'hvy'
+                organizationUrl = '<https://hvy.kr>'
             }
         }
 
@@ -173,9 +168,13 @@ dependencies {
     api 'org.apache.commons:commons-text:1.13.0'
     api 'commons-io:commons-io:2.18.0'
 
+    // guava
+    api 'com.google.guava:guava:33.4.0-jre'
+
+
     // cache
     implementation 'org.springframework.boot:spring-boot-starter-cache'
-    implementation 'com.github.ben-manes.caffeine:caffeine:3.2.0'
+    api 'com.github.ben-manes.caffeine:caffeine:3.2.0'
 
     // logging
     implementation 'org.springframework.boot:spring-boot-starter-actuator'

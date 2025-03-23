@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 import kr.hvy.common.notify.Notify;
 import kr.hvy.common.notify.NotifyRequest;
 import lombok.RequiredArgsConstructor;
@@ -64,12 +66,14 @@ public class SlackClient implements Notify {
   private ChatPostMessageRequest buildErrorMessageRequest(NotifyRequest request) {
     List<LayoutBlock> blocks = buildErrorBlocks(request.getException(), request.isNotify());
     Attachment attachment = Attachment.builder()
+        .fallback(request.getException().getMessage())
         .color("#ff0000")
         .text(Arrays.toString(request.getException().getStackTrace()))
         .build();
 
     return ChatPostMessageRequest.builder()
         .channel(request.getChannel())
+        .text(request.getException().getMessage())
         .blocks(blocks)
         .attachments(Collections.singletonList(attachment))
         .build();
@@ -79,6 +83,7 @@ public class SlackClient implements Notify {
     List<LayoutBlock> blocks = buildTextBlocks(request.getMessage(), request.isNotify());
     return ChatPostMessageRequest.builder()
         .channel(request.getChannel())
+        .text(request.getMessage())
         .blocks(blocks)
         .build();
   }
@@ -99,14 +104,18 @@ public class SlackClient implements Notify {
     int lineNumber = e.getStackTrace()[0].getLineNumber();
 
     return asBlocks(
-        isChannel ? section(section -> section.text(markdownText("<!channel>"))) : null,
-        header(header -> header.text(plainText(e.getMessage()))),
-        section(section -> section.text(markdownText(MessageFormat.format("*Package* {0}", packageName)))),
-        section(section -> section.fields(Arrays.asList(
-            markdownText(MessageFormat.format("*Class* {0}", className)),
-            markdownText(MessageFormat.format("*Method* {0}", methodName)),
-            markdownText(MessageFormat.format("*Line* {0}", lineNumber))
-        )))
+        Stream.of(
+                isChannel ? section(section -> section.text(markdownText("<!channel>"))) : null,
+                header(header -> header.text(plainText(e.getMessage()))),
+                section(section -> section.text(markdownText(MessageFormat.format("*Package* {0}", packageName)))),
+                section(section -> section.fields(Arrays.asList(
+                    markdownText(MessageFormat.format("*Class* {0}", className)),
+                    markdownText(MessageFormat.format("*Method* {0}", methodName)),
+                    markdownText(MessageFormat.format("*Line* {0}", lineNumber))
+                )))
+            )
+            .filter(Objects::nonNull)
+            .toArray(LayoutBlock[]::new)
     );
   }
 }
