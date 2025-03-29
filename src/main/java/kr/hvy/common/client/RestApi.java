@@ -5,6 +5,7 @@ import java.util.Optional;
 import kr.hvy.common.exception.RestApiException;
 import kr.hvy.common.notify.Notify;
 import kr.hvy.common.notify.NotifyRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -18,18 +19,12 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
+@RequiredArgsConstructor
 public class RestApi {
 
   private final RestClient restClient;
   protected final Optional<Notify> notify;
-  protected final String defaultErrorChannel;
-
-
-  public RestApi(RestClient restClient, Optional<Notify> notify, String defaultErrorChannel) {
-    this.restClient = restClient;
-    this.notify = notify;
-    this.defaultErrorChannel = defaultErrorChannel;
-  }
+  protected final Optional<String> defaultErrorChannel;
 
   public <T> T get(String uri, Class<T> responseType) {
     return exchange(uri, HttpMethod.GET, null, null, responseType, (Object) null);
@@ -141,7 +136,7 @@ public class RestApi {
       log.error(ex.getMessage(), ex);
 
       notify.ifPresent(value -> value.sendMessage(NotifyRequest.builder()
-          .channel(defaultErrorChannel)
+          .channel(defaultErrorChannel.orElse("#hvy-error"))
           .exception(ex)
           .build()));
 

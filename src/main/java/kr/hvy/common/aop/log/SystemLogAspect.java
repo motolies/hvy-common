@@ -66,7 +66,7 @@ public class SystemLogAspect {
   @Async
   protected void extracted(ProceedingJoinPoint joinPoint, LocalDateTime requestTime, ZonedDateTime start, Object result) {
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-    var systemLogCreateBuilder = SystemLogCreate.builder()
+    SystemLogCreate.SystemLogCreateBuilder systemLogCreateBuilder = SystemLogCreate.builder()
         .traceId(tracer.currentSpan().context().traceIdString())
         .spanId(tracer.currentSpan().context().spanIdString())
         .requestUri(request.getRequestURI())

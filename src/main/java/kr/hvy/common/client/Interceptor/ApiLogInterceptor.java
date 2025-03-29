@@ -1,13 +1,22 @@
 package kr.hvy.common.client.Interceptor;
 
+import brave.Tracer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Optional;
+import kr.hvy.common.aop.log.dto.ApiLogCreate;
+import kr.hvy.common.aop.log.service.ApiLogService;
+import kr.hvy.common.domain.vo.EventLog;
 import kr.hvy.common.notify.Notify;
 import kr.hvy.common.notify.NotifyRequest;
+import kr.hvy.common.security.SecurityUtils;
+import kr.hvy.common.util.ApplicationContextUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
@@ -19,30 +28,36 @@ import org.springframework.util.StreamUtils;
 
 @Slf4j
 //@Profile("!default")
-//@Component
+@Component
+@RequiredArgsConstructor
 public class ApiLogInterceptor implements ClientHttpRequestInterceptor {
 
-  protected final Optional<Notify> notify;
-  protected final String defaultErrorChannel;
+  private final Tracer tracer;
+  private final Optional<ApiLogService> apiLogService;
+  private final Optional<Notify> notify;
+  private final Optional<String> defaultErrorChannel;
 
-
-  public ApiLogInterceptor(Optional<Notify> notify, String defaultErrorChannel) {
-    this.notify = notify;
-    this.defaultErrorChannel = defaultErrorChannel;
-  }
 
   @Override
   public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-    LocalDateTime createdOn = LocalDateTime.now();
-    long start = System.currentTimeMillis();
     ClientHttpResponse response = null;
 
-    // 요청 로깅
-    log.info("=== Outbound Request ===");
-    log.info("URI         : {}", request.getURI());
-    log.info("Method      : {}", request.getMethod());
-    log.info("Headers     : {}", request.getHeaders());
-    log.info("RequestBody : {}", new String(body, StandardCharsets.UTF_8));
+    if (ApplicationContextUtils.isDefaultProfileOnly()) {
+      log.info("""
+              === Outbound Request ===
+              URI         : {}
+              Method      : {}
+              Headers     : {}
+              RequestBody : {}
+              """,
+          request.getURI(),
+          request.getMethod(),
+          request.getHeaders(),
+          new String(body, StandardCharsets.UTF_8));
+    }
+
+    LocalDateTime requestTime = LocalDateTime.now();
+    ZonedDateTime start = ZonedDateTime.now();
 
     try {
       ClientHttpResponse originResponse = execution.execute(request, body);
@@ -50,19 +65,46 @@ public class ApiLogInterceptor implements ClientHttpRequestInterceptor {
     } catch (Exception e) {
       throw e;
     } finally {
-      long end = System.currentTimeMillis();
-
       try {
-        // todo : 로깅 부분 작성해야 함 비동기로 저장시킴
-        // 응답 로깅
-        log.info("=== Outbound Response ===");
-        log.info("Status code  : {}", response.getStatusCode());
-        log.info("Headers      : {}", response.getHeaders());
-        log.info("Response Body: {}", new String(StreamUtils.copyToByteArray(response.getBody()), StandardCharsets.UTF_8));
+        long duration = Duration.between(start, ZonedDateTime.now()).toMillis();
+
+        if (ApplicationContextUtils.isDefaultProfileOnly()) {
+          log.info("""
+                  === Outbound Response ===
+                  Process Time : {} ms
+                  Status code  : {}
+                  Headers      : {}
+                  Response Body: {}
+                  """,
+              duration,
+              response.getStatusCode(),
+              response.getHeaders(),
+              new String(StreamUtils.copyToByteArray(response.getBody()), StandardCharsets.UTF_8));
+        }
+
+        ApiLogCreate apiLogCreate = ApiLogCreate.builder()
+            .traceId(tracer.currentSpan().context().traceIdString())
+            .spanId(tracer.currentSpan().context().spanIdString())
+            .requestUri(String.valueOf(request.getURI()))
+            .httpMethodType(String.valueOf(request.getMethod()))
+            .requestHeader(String.valueOf(request.getHeaders()))
+            .requestParam(request.getURI().getQuery())
+            .requestBody(new String(body, StandardCharsets.UTF_8))
+            .responseStatus(response != null ? response.getStatusCode().toString() : null)
+            .responseBody(response != null ? new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8) : null)
+            .created(EventLog.builder()
+                .at(requestTime)
+                .by(SecurityUtils.getUsername())
+                .build())
+            .processTime(duration)
+            .build();
+
+        apiLogService.ifPresent(apiLog -> apiLog.save(apiLogCreate));
+
       } catch (Exception e) {
         log.error("OutboundApiLoggingInterceptor Exception: {}", e.getMessage(), e);
         notify.ifPresent(value -> value.sendMessage(NotifyRequest.builder()
-            .channel(defaultErrorChannel)
+            .channel(defaultErrorChannel.orElse("#hvy-error"))
             .exception(e)
             .build()));
       }

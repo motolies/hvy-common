@@ -10,6 +10,7 @@ import kr.hvy.common.advice.dto.FieldValidation;
 import kr.hvy.common.code.ApiResponseStatus;
 import kr.hvy.common.notify.Notify;
 import kr.hvy.common.notify.NotifyRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -24,22 +25,18 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @Slf4j
+@RequiredArgsConstructor
 public abstract class ResponseWrapperConfigure extends ResponseEntityExceptionHandler implements ResponseBodyAdvice<Object> {
 
   protected final ObjectMapper objectMapper;
   protected final Optional<Notify> notify;
-  protected final String defaultErrorChannel;
-
-  public ResponseWrapperConfigure(ObjectMapper objectMapper, Optional<Notify> notify, String defaultErrorChannel) {
-    this.objectMapper = objectMapper;
-    this.notify = notify;
-    this.defaultErrorChannel = defaultErrorChannel;
-  }
+  protected final Optional<String> defaultErrorChannel;
 
   @Override
   public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -101,7 +98,7 @@ public abstract class ResponseWrapperConfigure extends ResponseEntityExceptionHa
     }
 
     notify.ifPresent(value -> value.sendMessage(NotifyRequest.builder()
-        .channel(defaultErrorChannel)
+        .channel(defaultErrorChannel.orElse("#hvy-error"))
         .exception(ex)
         .build()));
 
@@ -117,7 +114,7 @@ public abstract class ResponseWrapperConfigure extends ResponseEntityExceptionHa
   @ExceptionHandler(Exception.class)
   public ApiResponse<?> handleException(Exception ex) {
     notify.ifPresent(value -> value.sendMessage(NotifyRequest.builder()
-        .channel(defaultErrorChannel)
+        .channel(defaultErrorChannel.orElse("#hvy-error"))
         .exception(ex)
         .build()));
 
