@@ -110,11 +110,6 @@ public class RestApi {
 
   private <R, P> R exchange(String uri, HttpMethod method, HttpEntity<P> requestEntity, MultiValueMap<String, String> urlParameters, Class<R> responseType, Object... uriVariables) {
 
-    // http로 시작하지 않고 uri가 '/'로 시작하지 않으면 '/'를 붙여준다.
-    if (!uri.startsWith("http") && !uri.startsWith("/")) {
-      uri = "/" + uri;
-    }
-
     if (MapUtils.isNotEmpty(urlParameters)) {
       UriComponents uriComponents = UriComponentsBuilder.fromUriString(uri)
           .queryParams(urlParameters)
