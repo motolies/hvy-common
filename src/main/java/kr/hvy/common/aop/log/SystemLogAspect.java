@@ -64,8 +64,10 @@ public class SystemLogAspect {
   }
 
   @Async
-  protected void extracted(ProceedingJoinPoint joinPoint, LocalDateTime requestTime, ZonedDateTime start, Object result) {
-    HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+  protected void extracted(ProceedingJoinPoint joinPoint, LocalDateTime requestTime, ZonedDateTime start,
+      Object result) {
+    HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+        .getRequest();
     SystemLogCreate.SystemLogCreateBuilder systemLogCreateBuilder = SystemLogCreate.builder()
         .traceId(tracer.currentSpan().context().traceIdString())
         .spanId(tracer.currentSpan().context().spanIdString())
@@ -94,7 +96,14 @@ public class SystemLogAspect {
   }
 
   private String getRemoteAddr(HttpServletRequest request) {
-    String remoteAddr = request.getHeader("X-Forwarded-For");
+    String remoteAddr = request.getHeader("X-Real-IP");
+    if (remoteAddr == null) {
+      remoteAddr = request.getHeader("X-Forwarded-For");
+      if (remoteAddr != null && remoteAddr.contains(",")) {
+        // X-Forwarded-For 헤더에 여러 IP가 있을 경우 첫 번째 IP 사용
+        remoteAddr = remoteAddr.split(",")[0].trim();
+      }
+    }
     if (remoteAddr == null) {
       remoteAddr = request.getRemoteAddr();
     }
@@ -106,7 +115,8 @@ public class SystemLogAspect {
     Map<String, String> paramMap = new HashMap<>();
     String[] parameterNames = ((CodeSignature) joinPoint.getSignature()).getParameterNames();
     for (int i = 0; i < parameterNames.length; i++) {
-      if (!(args[i] instanceof Errors || args[i] instanceof HttpServletRequest || args[i] instanceof HttpServletResponse)) {
+      if (!(args[i] instanceof Errors || args[i] instanceof HttpServletRequest
+          || args[i] instanceof HttpServletResponse)) {
         paramMap.put(parameterNames[i], writeValueAsString(args[i]));
       }
     }
@@ -121,6 +131,5 @@ public class SystemLogAspect {
       return "Can not converter data.";
     }
   }
-
 
 }
