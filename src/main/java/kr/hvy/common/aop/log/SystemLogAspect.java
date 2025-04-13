@@ -23,8 +23,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.CodeSignature;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -56,15 +54,15 @@ public class SystemLogAspect {
     try {
       result = joinPoint.proceed();
     } catch (Throwable e) {
-      extracted(joinPoint, requestTime, start, e);
-      throw new RuntimeException(e);
+      loggingSave(joinPoint, requestTime, start, e);
+      throw e;
     }
-    extracted(joinPoint, requestTime, start, result);
+    loggingSave(joinPoint, requestTime, start, result);
     return result;
   }
 
   @Async
-  protected void extracted(ProceedingJoinPoint joinPoint, LocalDateTime requestTime, ZonedDateTime start,
+  protected void loggingSave(ProceedingJoinPoint joinPoint, LocalDateTime requestTime, ZonedDateTime start,
       Object result) {
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
         .getRequest();
