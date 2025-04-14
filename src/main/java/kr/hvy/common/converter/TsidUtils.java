@@ -1,14 +1,17 @@
 package kr.hvy.common.converter;
 
 import io.hypersistence.tsid.TSID;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 public class TsidUtils {
 
-  public static TSID getTsid() {
+  public static TSID getFastTsid() {
     return TSID.fast();
+  }
+
+  public static TSID getTsid() {
+    return TSID.Factory.getTsid256();
   }
 
   public static TSID getTsid(String tsid) {
