@@ -13,7 +13,7 @@ public class TsidUtils {
   public static TSID getTsid() {
     return TSID.Factory.getTsid256();
   }
-
+  
   public static TSID getTsid(String tsid) {
     return TSID.from(tsid);
   }
