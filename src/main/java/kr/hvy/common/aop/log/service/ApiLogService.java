@@ -6,6 +6,9 @@ import kr.hvy.common.domain.mapper.ApiLogMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -20,4 +23,8 @@ public class ApiLogService {
     apiLogRepository.save(systemLogEntity);
   }
 
+  @Transactional
+  public int deleteLogsOlderThan(LocalDateTime cutoffDate) {
+    return apiLogRepository.deleteByCreatedAtBefore(cutoffDate);
+  }
 }
