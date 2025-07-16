@@ -5,6 +5,20 @@
 implementation 'net.ttddyy:datasource-proxy:1.10.1'
 ```
 
+빈 등록
+```java
+  @Bean
+  @ConfigurationProperties(prefix = "hvy.sql.datasource-wrapper")
+  public DataSourceProxySettingProperty dataSourceProxySettingProperty() {
+    return new DataSourceProxySettingProperty();
+  }
+
+  @Bean
+  public DataSourceWrapperPostProcessor dataSourceWrapperPostProcessor(DataSourceProxySettingProperty dataSourceProxySettingProperty) {
+    return new DataSourceWrapperPostProcessor(dataSourceProxySettingProperty);
+  }
+```
+
 ```yaml
 # 로그 레벨 
 log:
