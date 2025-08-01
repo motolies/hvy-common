@@ -2,6 +2,7 @@ package kr.hvy.common.aop.lock;
 
 import java.util.Optional;
 import kr.hvy.common.exception.RedissonLockAcquisitionException;
+import kr.hvy.common.expression.SpelExpressionService;
 import kr.hvy.common.redis.RedissonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +14,6 @@ import org.redisson.api.RLock;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -26,7 +25,7 @@ import org.springframework.stereotype.Component;
 public class DistributedLockAspect {
 
   private final RedissonUtils redissonUtils;
-  private final SpelExpressionParser parser = new SpelExpressionParser();
+  private final SpelExpressionService spelExpressionService;
 
   @Around("@annotation(distributedLock)")
   public Object lock(ProceedingJoinPoint joinPoint, DistributedLock distributedLock) throws Throwable {
@@ -35,7 +34,7 @@ public class DistributedLockAspect {
     Object[] args = joinPoint.getArgs();
 
     // SpEL을 통해 메소드 인자에서 동적으로 락 키 값을 가져옴
-    String dynamicKey = getDynamicValue(parameterNames, args, distributedLock.key());
+    String dynamicKey = spelExpressionService.evaluateExpression(parameterNames, args, distributedLock.key());
     String lockName = String.format("lock:%s", dynamicKey);
 
     Optional<RLock> optionalRLock = redissonUtils.tryLock(
@@ -58,13 +57,5 @@ public class DistributedLockAspect {
         rLock.unlock();
       }
     }
-  }
-
-  private String getDynamicValue(String[] parameterNames, Object[] args, String expression) {
-    StandardEvaluationContext context = new StandardEvaluationContext();
-    for (int i = 0; i < parameterNames.length; i++) {
-      context.setVariable(parameterNames[i], args[i]);
-    }
-    return parser.parseExpression(expression).getValue(context, String.class);
   }
 }
