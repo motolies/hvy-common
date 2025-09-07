@@ -11,7 +11,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RLock;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -19,9 +18,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Aspect
 @Component
-@ConditionalOnBean(RedissonUtils.class)
 @RequiredArgsConstructor
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE + 2)
 public class DistributedLockAspect {
 
   private final RedissonUtils redissonUtils;
@@ -33,8 +31,15 @@ public class DistributedLockAspect {
     String[] parameterNames = signature.getParameterNames();
     Object[] args = joinPoint.getArgs();
 
-    // SpEL을 통해 메소드 인자에서 동적으로 락 키 값을 가져옴
-    String dynamicKey = spelExpressionService.evaluateExpression(parameterNames, args, distributedLock.key());
+    // 키가 SpEL 표현식인지 확인하여 적절히 처리
+    String dynamicKey;
+    if (spelExpressionService.isSpelExpression(distributedLock.key())) {
+      // SpEL 표현식인 경우 평가하여 동적 키 생성
+      dynamicKey = spelExpressionService.evaluateExpression(parameterNames, args, distributedLock.key());
+    } else {
+      // 일반 문자열인 경우 그대로 사용
+      dynamicKey = distributedLock.key();
+    }
     String lockName = String.format("lock:%s", dynamicKey);
 
     Optional<RLock> optionalRLock = redissonUtils.tryLock(

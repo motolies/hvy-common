@@ -173,7 +173,6 @@ kr.hvy.common.application/
 │   ├── entity/    # 공통 엔티티 (EventLogEntity)
 │   └── usecase/   # 공통 UseCase 인터페이스
 ├── mapper/        # MapStruct 매퍼들
-├── layer/         # 아키텍처 레이어 어노테이션 (@UseCase, @InputAdapter 등)
 └── crypto/        # 암호화 기능
     ├── config/    # 암호화 설정
     ├── annotation/ # @EncryptedField, @SecretData

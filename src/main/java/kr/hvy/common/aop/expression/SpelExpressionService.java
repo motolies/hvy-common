@@ -59,6 +59,28 @@ public class SpelExpressionService {
     return parser.parseExpression(expression).getValue(context, returnType);
   }
 
+  /**
+   * 주어진 문자열이 SpEL 표현식인지 확인합니다.
+   * SpEL 표현식의 특징적인 문자들(#, @, ', +, ., (, ))을 확인하여 판별합니다.
+   *
+   * @param expression 확인할 문자열
+   * @return SpEL 표현식이면 true, 일반 문자열이면 false
+   */
+  public boolean isSpelExpression(String expression) {
+    if (expression == null || expression.trim().isEmpty()) {
+      return false;
+    }
+    
+    // SpEL 표현식의 특징적인 문자들을 확인
+    return expression.contains("#") ||    // 파라미터 참조: #param
+           expression.contains("@") ||    // 빈 참조: @beanName
+           expression.contains("'") ||    // 문자열 리터럴: 'string'
+           expression.contains("+") ||    // 연산자: +
+           expression.contains(".") ||    // 메서드/프로퍼티 접근: obj.method()
+           expression.contains("(") ||    // 메서드 호출: method()
+           expression.contains(")");
+  }
+
   /*
    * 메서드 파라미터를 포함한 평가 컨텍스트를 생성합니다.
    * BeanFactoryResolver는 재사용하되, 매번 새로운 컨텍스트를 생성하여 변수 격리를 보장합니다.
