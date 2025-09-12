@@ -1,41 +1,24 @@
 package kr.hvy.common.config.executor;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskDecorator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 
 public class TaskExecutorConfigurer {
 
-
-  @Autowired(required = false)
-  TaskDecorator traceTaskDecorator;
-
-  protected TaskExecutor taskExecutor(int corePoolSize, int maxPoolSize, int queueCapacity, String threadNamePrefix) {
-    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    executor.setCorePoolSize(corePoolSize);
-    executor.setMaxPoolSize(maxPoolSize);
-    executor.setQueueCapacity(queueCapacity);
-    executor.setThreadNamePrefix(threadNamePrefix);
-    if (traceTaskDecorator != null) {
-      executor.setTaskDecorator(traceTaskDecorator);
-    }
-    executor.initialize();
-
-    return new DelegatingSecurityContextAsyncTaskExecutor(executor);
+  protected TaskExecutor virtualThreadExecutor(ExecutorService executorService) {
+    ConcurrentTaskExecutor exec = new ConcurrentTaskExecutor(executorService);
+    exec.setTaskDecorator(new TraceTaskDecorator()); // Micrometer 컨텍스트 전파
+    return exec;
   }
 
-  protected TaskExecutor taskExecutor(int corePoolSize, int maxPoolSize, int queueCapacity) {
-    return taskExecutor(corePoolSize, maxPoolSize, queueCapacity, "AsyncTask-");
+  protected ExecutorService vtExecutorService(String threadNamePrefix) {
+    return Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name(threadNamePrefix, 0).factory());
   }
 
-  protected TaskExecutor taskExecutor(int poolSize, int queueCapacity) {
-    return taskExecutor(poolSize, poolSize, queueCapacity);
-  }
-
-  protected TaskExecutor taskExecutor(int poolSize, int queueCapacity, String threadNamePrefix) {
-    return taskExecutor(poolSize, poolSize, queueCapacity, threadNamePrefix);
+  protected ExecutorService vtExecutorService() {
+    return vtExecutorService("async-vt-");
   }
 
 }
