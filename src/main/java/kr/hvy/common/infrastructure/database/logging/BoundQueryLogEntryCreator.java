@@ -1,7 +1,11 @@
 package kr.hvy.common.infrastructure.database.logging;
 
 
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
@@ -43,33 +47,37 @@ public class BoundQueryLogEntryCreator extends DefaultQueryLogEntryCreator {
 
   /**
    * 파라미터 목록을 직접 "?" 자리에 치환해서 "바인딩된 SQL" 문자열을 만든다.
+   * setNull 메서드를 올바르게 처리하고 인덱스 기반 매핑을 사용하여 정확한 SQL 로깅을 제공한다.
    */
   private String getInlinedQuery(String query, QueryInfo queryInfo) {
-    // datasource-proxy는 QueryInfo에 여러 parametersList가 있을 수 있음(배치 등).
-    // 여기서는 "첫 번째 파라미터 세트"만 사용한다고 가정.
     if (queryInfo.getParametersList().isEmpty()) {
       return query;
     }
 
     List<ParameterSetOperation> firstParamSet = queryInfo.getParametersList().get(0);
+    Map<Integer, Object> parameterMap = new TreeMap<>();
+
     for (ParameterSetOperation param : firstParamSet) {
       Object[] args = param.getArgs();
-      if (args == null || args.length == 0) {
+      String methodName = param.getMethod().getName();
+
+      if (args == null || args.length < 2) {
         continue;
       }
-      // 간단히 "마지막 인자"를 실제 파라미터 값으로 보고 치환
-      Object value = args[args.length - 1];
 
-      String replacedValue;
-      if (value instanceof String) {
-        replacedValue = "'" + value + "'";
-      } else {
-        replacedValue = String.valueOf(value);
-      }
-      // 첫 번째 '?'만 순차적으로 교체
-      query = query.replaceFirst("\\?", Matcher.quoteReplacement(replacedValue));
+      Integer index = (Integer) args[0];  // 첫 번째 인자는 파라미터 인덱스
+      Object value = "setNull".equals(methodName) ? null : args[1];  // setNull은 null, 나머지는 실제 값
+      parameterMap.put(index, value);
     }
-    return query;
+
+    // 인덱스 순서대로 파라미터 치환
+    String result = query;
+    for (Map.Entry<Integer, Object> entry : parameterMap.entrySet()) {
+      String replacedValue = formatParameterValue(entry.getValue());
+      result = result.replaceFirst("\\?", Matcher.quoteReplacement(replacedValue));
+    }
+
+    return result;
   }
 
   /**
@@ -92,6 +100,76 @@ public class BoundQueryLogEntryCreator extends DefaultQueryLogEntryCreator {
 
   private String formatSqlQuery(String query) {
     return FormatStyle.BASIC.getFormatter().format(query);
+  }
+
+  /**
+   * 파라미터 값을 타입에 따라 적절히 포맷팅
+   */
+  private String formatParameterValue(Object value) {
+    if (value == null) return "null";
+
+    if (value instanceof String) {
+      return escapeStringValue((String) value);
+    }
+
+    // LocalDate: 'yyyy-MM-dd' 형식
+    if (value instanceof java.time.LocalDate) {
+      return "'" + ((java.time.LocalDate) value).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "'";
+    }
+
+    // LocalDateTime: 'yyyy-MM-dd HH:mm:ss.SSSSSS' 형식
+    if (value instanceof java.time.LocalDateTime) {
+      return "'" + ((java.time.LocalDateTime) value).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")) + "'";
+    }
+
+    // LocalTime: 'HH:mm:ss.SSSSSS' 형식
+    if (value instanceof java.time.LocalTime) {
+      return "'" + ((java.time.LocalTime) value).format(DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSS")) + "'";
+    }
+
+    // java.sql.Date: 'yyyy-MM-dd' 형식
+    if (value instanceof java.sql.Date) {
+      return "'" + new SimpleDateFormat("yyyy-MM-dd").format((java.sql.Date) value) + "'";
+    }
+
+    // java.sql.Timestamp: 'yyyy-MM-dd HH:mm:ss.SSSSSS' 형식
+    if (value instanceof java.sql.Timestamp) {
+      // SimpleDateFormat에서는 S가 millisecond이므로, Timestamp의 toString() 사용
+      String timestampStr = value.toString();
+      // 필요시 microsecond 자릿수 조정
+      if (timestampStr.length() > 19 && timestampStr.contains(".")) {
+        String[] parts = timestampStr.split("\\.");
+        if (parts.length == 2) {
+          String nanos = parts[1];
+          // 6자리 microsecond로 맞추기
+          if (nanos.length() > 6) {
+            nanos = nanos.substring(0, 6);
+          } else {
+            nanos = String.format("%-6s", nanos).replace(' ', '0');
+          }
+          timestampStr = parts[0] + "." + nanos;
+        }
+      }
+      return "'" + timestampStr + "'";
+    }
+
+    // 기타 타입은 그대로
+    return String.valueOf(value);
+  }
+
+  /**
+   * 문자열 값의 특수문자를 SQL 로깅에 적합하게 이스케이프 처리
+   */
+  private String escapeStringValue(String value) {
+    if (value == null) return "null";
+
+    // SQL 표준에 따라 작은따옴표를 두 개로 이스케이프
+    String escaped = value.replace("'", "''");
+
+    // 백슬래시도 이스케이프 (로그 가독성 향상)
+    escaped = escaped.replace("\\", "\\\\");
+
+    return "'" + escaped + "'";
   }
 
 }
