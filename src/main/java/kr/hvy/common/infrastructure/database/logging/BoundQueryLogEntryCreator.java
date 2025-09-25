@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.StatementType;
@@ -47,13 +46,17 @@ public class BoundQueryLogEntryCreator extends DefaultQueryLogEntryCreator {
 
   /**
    * 파라미터 목록을 직접 "?" 자리에 치환해서 "바인딩된 SQL" 문자열을 만든다.
-   * setNull 메서드를 올바르게 처리하고 인덱스 기반 매핑을 사용하여 정확한 SQL 로깅을 제공한다.
+   * 2단계 치환 방식으로 문자열 리터럴 안의 ?와 SQL 파라미터 자리표시자를 안전하게 구분한다.
    */
   private String getInlinedQuery(String query, QueryInfo queryInfo) {
     if (queryInfo.getParametersList().isEmpty()) {
       return query;
     }
 
+    // 1단계: SQL 파라미터를 안전한 플레이스홀더로 치환
+    String queryWithPlaceholders = replaceParametersWithPlaceholders(query);
+
+    // 파라미터 매핑 구성 (기존 로직 유지)
     List<ParameterSetOperation> firstParamSet = queryInfo.getParametersList().get(0);
     Map<Integer, Object> parameterMap = new TreeMap<>();
 
@@ -70,13 +73,52 @@ public class BoundQueryLogEntryCreator extends DefaultQueryLogEntryCreator {
       parameterMap.put(index, value);
     }
 
-    // 인덱스 순서대로 파라미터 치환
-    String result = query;
-    for (Map.Entry<Integer, Object> entry : parameterMap.entrySet()) {
-      String replacedValue = formatParameterValue(entry.getValue());
-      result = result.replaceFirst("\\?", Matcher.quoteReplacement(replacedValue));
+    // 2단계: 플레이스홀더를 실제 값으로 치환
+    return replacePlaceholdersWithValues(queryWithPlaceholders, parameterMap);
+  }
+
+  /**
+   * 원본 쿼리의 SQL 파라미터 자리표시자(?)를 안전한 플레이스홀더로 치환한다.
+   * 문자열 리터럴 안의 ?는 치환하지 않는다.
+   */
+  private String replaceParametersWithPlaceholders(String query) {
+    int paramCount = 1;
+    StringBuilder result = new StringBuilder();
+    boolean inStringLiteral = false;
+
+    for (int i = 0; i < query.length(); i++) {
+      char c = query.charAt(i);
+
+      if (c == '\'') {
+        // SQL 이스케이프 처리: '' 는 작은따옴표 하나를 의미
+        if (inStringLiteral && i + 1 < query.length() && query.charAt(i + 1) == '\'') {
+          result.append("''");
+          i++; // 다음 따옴표 건너뛰기
+        } else {
+          inStringLiteral = !inStringLiteral;
+          result.append(c);
+        }
+      } else if (c == '?' && !inStringLiteral) {
+        // 문자열 리터럴 밖의 ?만 플레이스홀더로 치환
+        result.append("__PARAM_").append(paramCount++).append("__");
+      } else {
+        result.append(c);
+      }
     }
 
+    return result.toString();
+  }
+
+  /**
+   * 플레이스홀더를 실제 파라미터 값으로 치환한다.
+   */
+  private String replacePlaceholdersWithValues(String query, Map<Integer, Object> parameterMap) {
+    String result = query;
+    for (Map.Entry<Integer, Object> entry : parameterMap.entrySet()) {
+      String placeholder = "__PARAM_" + entry.getKey() + "__";
+      String value = formatParameterValue(entry.getValue());
+      result = result.replace(placeholder, value);
+    }
     return result;
   }
 
