@@ -3,6 +3,7 @@ package kr.hvy.common.aop.logging.service;
 import java.time.LocalDateTime;
 import kr.hvy.common.aop.logging.dto.ApiLogCreate;
 import kr.hvy.common.aop.logging.entity.ApiLog;
+import kr.hvy.common.aop.logging.repository.ApiLogRepository;
 import kr.hvy.common.application.domain.mapper.ApiLogDtoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -26,4 +27,5 @@ public class ApiLogService {
   public int deleteLogsOlderThan(LocalDateTime cutoffDate) {
     return apiLogRepository.deleteByCreatedAtBefore(cutoffDate);
   }
+
 }
