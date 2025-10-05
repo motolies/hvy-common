@@ -62,8 +62,7 @@ public class SystemLogAspect {
   }
 
   @Async
-  protected void loggingSave(ProceedingJoinPoint joinPoint, LocalDateTime requestTime, ZonedDateTime start,
-      Object result) {
+  protected void loggingSave(ProceedingJoinPoint joinPoint, LocalDateTime requestTime, ZonedDateTime start, Object result) {
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
         .getRequest();
     SystemLogCreate.SystemLogCreateBuilder systemLogCreateBuilder = SystemLogCreate.builder()
@@ -110,15 +109,32 @@ public class SystemLogAspect {
 
   private String getMethodParameter(ProceedingJoinPoint joinPoint) {
     Object[] args = joinPoint.getArgs();
-    Map<String, String> paramMap = new HashMap<>();
+    Map<String, Object> paramMap = new HashMap<>();
     String[] parameterNames = ((CodeSignature) joinPoint.getSignature()).getParameterNames();
     for (int i = 0; i < parameterNames.length; i++) {
       if (!(args[i] instanceof Errors || args[i] instanceof HttpServletRequest
           || args[i] instanceof HttpServletResponse)) {
-        paramMap.put(parameterNames[i], writeValueAsString(args[i]));
+        paramMap.put(parameterNames[i], serializeParameter(args[i]));
       }
     }
     return writeValueAsString(paramMap);
+  }
+
+  private Object serializeParameter(Object param) {
+    if (param == null) {
+      return null;
+    }
+
+    try {
+      // JSON 직렬화 가능 여부 테스트
+      objectMapper.writeValueAsString(param);
+      // 성공하면 원본 객체 반환 (나중에 전체 Map과 함께 직렬화됨)
+      return param;
+    } catch (JsonProcessingException e) {
+      // 직렬화 실패 시 toString()으로 폴백
+      log.debug("Cannot serialize parameter of type {}: {}", param.getClass().getName(), e.getMessage());
+      return param.toString();
+    }
   }
 
   private String writeValueAsString(Object object) {
