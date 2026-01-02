@@ -56,7 +56,7 @@ public class ApiLog {
   @Column(length = 128)
   private String responseStatus;
 
-  @Column(columnDefinition = "TEXT")
+  @Column(columnDefinition = "MEDIUMTEXT")
   private String responseBody;
 
   @Column
