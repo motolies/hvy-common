@@ -63,6 +63,7 @@ public class PageInterceptor implements Interceptor {
       MappedStatement mappedStatement = (MappedStatement) metaObject.getValue("delegate.mappedStatement");
 
       String countSql = originalSql.replaceFirst("(?is)SELECT\\s+.+?\\sFROM\\s", "SELECT COUNT(*) FROM ");
+      countSql = countSql.replaceFirst("(?is)\\sORDER\\s+BY\\s+[\\s\\S]*$", "");
       BoundSql countBoundSql = copyFromBoundSql(mappedStatement, boundSql, countSql);
 
       // invocation의 인자에서 Connection 가져오기 (prepare 메서드의 첫번째 인자)
