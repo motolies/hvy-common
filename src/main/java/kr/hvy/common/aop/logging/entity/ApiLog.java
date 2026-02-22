@@ -56,7 +56,7 @@ public class ApiLog {
   @Column(length = 128)
   private String responseStatus;
 
-  @Column(columnDefinition = "MEDIUMTEXT")
+  @Column(columnDefinition = "TEXT")
   private String responseBody;
 
   @Column
@@ -64,7 +64,7 @@ public class ApiLog {
 
   @Embedded
   @AttributeOverrides({
-      @AttributeOverride(name = "at", column = @Column(name = "createdAt", columnDefinition = "DATETIME(6)", nullable = false)),
+      @AttributeOverride(name = "at", column = @Column(name = "createdAt", columnDefinition = "TIMESTAMP(6)", nullable = false)),
       @AttributeOverride(name = "by", column = @Column(name = "createdBy"))
   })
   @Builder.Default

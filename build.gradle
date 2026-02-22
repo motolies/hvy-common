@@ -184,7 +184,7 @@ dependencies {
 
     // implementation 대신 api를 사용하면 다른 모듈에서도 사용 가능
     // tsid
-    api 'io.hypersistence:hypersistence-utils-hibernate-60:3.9.0'
+    api 'io.hypersistence:hypersistence-utils-hibernate-63:3.15.2'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

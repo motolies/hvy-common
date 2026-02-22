@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,6 +23,10 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 
   public static <T> Optional<T> getBean(Class<T> beanClass) {
     return Optional.ofNullable(context.getBean(beanClass));
+  }
+
+  public static ApplicationEventPublisher getEventPublisher() {
+    return context;
   }
 
   public static String getActiveProfile() {

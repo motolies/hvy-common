@@ -108,7 +108,7 @@ public class PageInterceptor implements Interceptor {
 
   private static void setLimit(PageRequest pageRequest, StringBuilder modifiedSql) {
     int offset = pageRequest.getPage() * pageRequest.getPageSize();
-    modifiedSql.append("\n").append("LIMIT ").append(offset).append(", ").append(pageRequest.getPageSize());
+    modifiedSql.append("\n").append("LIMIT ").append(pageRequest.getPageSize()).append(" OFFSET ").append(offset);
   }
 
   private static void setOrderBy(PageRequest pageRequest, StringBuilder modifiedSql) {
