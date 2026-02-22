@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 public abstract class BasePage {
 
   @Builder.Default
-  protected int page = 0;
+  protected int page = 1;
   @Builder.Default
   protected int pageSize = 10;
   protected int totalCount;

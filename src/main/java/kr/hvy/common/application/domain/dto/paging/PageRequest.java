@@ -24,7 +24,7 @@ public abstract class PageRequest extends BasePage {
   private boolean isAdmin = SecurityUtils.hasAdminRole();
 
   public int getOffset() {
-    return page * pageSize;
+    return (page - 1) * pageSize;
   }
 
 }
