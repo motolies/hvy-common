@@ -17,19 +17,19 @@ public class PageResponse<T> extends BasePage {
   }
 
   public boolean hasPrevios() {
-    return page > 1;
+    return page > 0;
   }
 
   public boolean hasNext() {
-    return page < getTotalPage();
+    return page < getTotalPage() - 1;
   }
 
   public int getBegin() {
-    return Math.max(1, page - 4);
+    return Math.max(0, page - 4);
   }
 
   public int getEnd() {
-    return Math.min(page + 5, getTotalPage() == 0 ? 1 : getTotalPage());
+    return Math.min(page + 5, Math.max(getTotalPage() - 1, 0));
   }
 
 
