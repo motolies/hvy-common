@@ -1,11 +1,9 @@
 plugins {
     id 'java'
     id 'java-library'
-    id 'maven-publish' // Maven Publishing 플러그인
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
-    id "com.vanniktech.maven.publish" version "0.34.0" // 대체 플러그인
-    id 'signing' // GPG 서명을 위한 플러그인 추가
+    id "com.vanniktech.maven.publish" version "0.34.0"
 }
 
 group = 'kr.hvy'
@@ -23,11 +21,6 @@ tasks.withType(Javadoc) {
         encoding 'UTF-8'
     }
 }
-
-signing {
-    sign publishing.publications
-}
-
 
 // Maven Publishing 블록 설정
 mavenPublishing {
@@ -79,42 +72,6 @@ mavenPublishing {
     }
 }
 
-publishing {
-    publications {
-        localPublication(MavenPublication) {
-            groupId = 'io.github.motolies'
-            artifactId = 'hvy-common'
-            version = version as String
-            from components.java
-            pom {
-                name = 'hvy-common'
-                description = 'A collection of common codes for local debugging'
-                url = 'https://github.com/motolies/hvy-common'
-                licenses {
-                    license {
-                        name = 'MIT License'
-                        url = 'https://opensource.org/license/mit/'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'motolies'
-                        name = 'Namwon Kim'
-                        email = 'knw1234@gmail.com'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:github.com/motolies/hvy-common.git'
-                    developerConnection = 'scm:git:ssh://github.com:motolies/hvy-common.git'
-                    url = 'https://github.com/motolies/hvy-common/tree/master'
-                }
-            }
-        }
-    }
-    repositories {
-        mavenLocal()
-    }
-}
 
 configurations {
     compileOnly {
