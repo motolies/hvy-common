@@ -11,19 +11,15 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import kr.hvy.common.aop.logging.dto.SystemLogCreate;
-import kr.hvy.common.aop.logging.service.SystemLogService;
 import kr.hvy.common.application.domain.vo.EventLog;
-import kr.hvy.common.core.code.ApiResponseStatus;
 import kr.hvy.common.core.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.CodeSignature;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -36,36 +32,22 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class SystemLogAspect {
 
   private final ObjectMapper objectMapper;
-  private final SystemLogService systemLogService;
+  private final SystemLogAsyncService systemLogAsyncService;
   private final Tracer tracer;
 
-  @Pointcut("execution(* kr.hvy..*Controller.*(..))")
+  @Pointcut("execution(* kr.hvy..*Controller.*(..)) && !execution(* kr.hvy..log..*Controller.*(..))")
   public void controllerPointcut() {
   }
 
   @Around("controllerPointcut()")
   public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
     LocalDateTime requestTime = LocalDateTime.now();
-
     ZonedDateTime start = ZonedDateTime.now();
 
-    // ProceedingJoinPoint를 실행하고 결과를 받아옵니다.
-    Object result = null;
-    try {
-      result = joinPoint.proceed();
-    } catch (Throwable e) {
-      loggingSave(joinPoint, requestTime, start, e);
-      throw e;
-    }
-    loggingSave(joinPoint, requestTime, start, result);
-    return result;
-  }
-
-  @Async
-  protected void loggingSave(ProceedingJoinPoint joinPoint, LocalDateTime requestTime, ZonedDateTime start, Object result) {
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
         .getRequest();
-    SystemLogCreate.SystemLogCreateBuilder systemLogCreateBuilder = SystemLogCreate.builder()
+
+    SystemLogCreate.SystemLogCreateBuilder builder = SystemLogCreate.builder()
         .traceId(tracer.currentSpan().context().traceIdString())
         .spanId(tracer.currentSpan().context().spanIdString())
         .requestUri(request.getRequestURI())
@@ -80,16 +62,15 @@ public class SystemLogAspect {
             .build())
         .processTime(Duration.between(start, ZonedDateTime.now()).toMillis());
 
-    if (result instanceof Throwable) {
-      systemLogCreateBuilder
-          .status(ApiResponseStatus.FAIL)
-          .stackTrace(ExceptionUtils.getStackTrace((Throwable) result));
-    } else {
-      systemLogCreateBuilder
-          .responseBody(writeValueAsString(result));
+    Object result = null;
+    try {
+      result = joinPoint.proceed();
+    } catch (Throwable e) {
+      systemLogAsyncService.saveAsync(builder, e);
+      throw e;
     }
-
-    systemLogService.save(systemLogCreateBuilder.build());
+    systemLogAsyncService.saveAsync(builder, result);
+    return result;
   }
 
   private String getRemoteAddr(HttpServletRequest request) {

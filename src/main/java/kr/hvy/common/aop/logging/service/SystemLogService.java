@@ -6,7 +6,6 @@ import kr.hvy.common.aop.logging.entity.SystemLog;
 import kr.hvy.common.aop.logging.repository.SystemLogRepository;
 import kr.hvy.common.application.domain.mapper.SystemLogDtoMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +17,6 @@ public class SystemLogService {
   private final SystemLogDtoMapper systemLogDtoMapper;
   private final SystemLogRepository systemLogRepository;
 
-  @Async
   public void save(SystemLogCreate systemLogCreate) {
     SystemLog systemLog = systemLogDtoMapper.toEntity(systemLogCreate);
     systemLogRepository.save(systemLog);
