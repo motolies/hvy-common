@@ -1,14 +1,10 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
-// import 꼭 해주세요
-
 plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish' // Maven Publishing 플러그인
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
-    id "com.vanniktech.maven.publish" version "0.28.0" // 대체 플러그인
+    id "com.vanniktech.maven.publish" version "0.34.0" // 대체 플러그인
     id 'signing' // GPG 서명을 위한 플러그인 추가
 }
 
@@ -36,7 +32,7 @@ signing {
 // Maven Publishing 블록 설정
 mavenPublishing {
     signAllPublications() // Gpg 서명을 위한 설정
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL) // 포탈로 등록 할거기 때문에 타입 추가
+    publishToMavenCentral(true) // Central Portal + 자동 릴리스
 
     coordinates("io.github.motolies", "hvy-common", version as String) // 네임 스페이스, 라이브러리 이름, 버전 순서로 작성
 
