@@ -15,8 +15,21 @@ java {
     }
 }
 
+tasks.register('delombok', JavaExec) {
+    mainClass = 'lombok.launch.Main'
+    doFirst {
+        classpath = files(configurations.annotationProcessor)
+        args 'delombok', 'src/main/java',
+             '-d', layout.buildDirectory.dir('delombok').get().asFile.path,
+             '--classpath', configurations.compileClasspath.asPath
+    }
+}
+
 tasks.withType(Javadoc) {
-    exclude 'kr/hvy/common/domain/mapper/**' // 제외할 패키지 경로
+    dependsOn delombok
+    source = fileTree(layout.buildDirectory.dir('delombok')) { include '**/*.java' }
+    exclude 'kr/hvy/common/domain/mapper/**'
+    classpath = configurations.compileClasspath
     options {
         encoding 'UTF-8'
     }
