@@ -1,4 +1,4 @@
-package kr.hvy.common.infrastructure.notification.slack.slack;
+package kr.hvy.common.infrastructure.notification.slack;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
