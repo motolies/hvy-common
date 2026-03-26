@@ -22,4 +22,7 @@ public class DataSourceProxySettingProperty {
   private int maxResultSetColumns = Integer.MAX_VALUE; // 최대 표시 컬럼 수 (무제한)
   private int maxColumnValueLength = Integer.MAX_VALUE; // 컬럼 값 최대 표시 길이 (무제한)
 
+  // SQL 파라미터 인라인 로깅 설정
+  private int maxParamValueLength = 500; // PreparedStatement 파라미터 인라인 시 문자열 값 최대 길이
+
 }

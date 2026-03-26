@@ -19,9 +19,11 @@ import org.hibernate.engine.jdbc.internal.FormatStyle;
 public class BoundQueryLogEntryCreator extends DefaultQueryLogEntryCreator {
 
   private final boolean formatQuery;
+  private final int maxParamValueLength;
 
-  public BoundQueryLogEntryCreator(boolean formatQuery) {
+  public BoundQueryLogEntryCreator(boolean formatQuery, int maxParamValueLength) {
     this.formatQuery = formatQuery;
+    this.maxParamValueLength = maxParamValueLength;
   }
 
   /**
@@ -205,12 +207,25 @@ public class BoundQueryLogEntryCreator extends DefaultQueryLogEntryCreator {
   private String escapeStringValue(String value) {
     if (value == null) return "null";
 
+    String displayValue = value;
+    boolean truncated = false;
+    int originalLength = value.length();
+
+    // 길이 제한 적용 (이스케이프 전 원본 기준)
+    if (maxParamValueLength > 0 && originalLength > maxParamValueLength) {
+      displayValue = value.substring(0, maxParamValueLength);
+      truncated = true;
+    }
+
     // SQL 표준에 따라 작은따옴표를 두 개로 이스케이프
-    String escaped = value.replace("'", "''");
+    String escaped = displayValue.replace("'", "''");
 
     // 백슬래시도 이스케이프 (로그 가독성 향상)
     escaped = escaped.replace("\\", "\\\\");
 
+    if (truncated) {
+      return "'" + escaped + "...[truncated, original length: " + originalLength + "]'";
+    }
     return "'" + escaped + "'";
   }
 

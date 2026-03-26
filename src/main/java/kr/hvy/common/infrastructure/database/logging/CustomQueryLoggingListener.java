@@ -15,7 +15,7 @@ public class CustomQueryLoggingListener implements QueryExecutionListener {
 
   public CustomQueryLoggingListener(DataSourceProxySettingProperty property) {
     this.property = property;
-    this.queryLogEntryCreator = new BoundQueryLogEntryCreator(property.isFormat());
+    this.queryLogEntryCreator = new BoundQueryLogEntryCreator(property.isFormat(), property.getMaxParamValueLength());
   }
 
   protected boolean writeDataSourceName = true;
