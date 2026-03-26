@@ -29,3 +29,11 @@ git tag -d $(git tag -l)
 # remote 내 전체 tag 삭제
 git push origin --delete $(git tag -l)
 ```
+
+```shell
+# git alias 등록
+git config --global alias.tag-rm '!f() { git tag -d "$1" && git push --delete origin "$1"; }; f'
+
+# local & remote tag 삭제
+git tag-rm {태그명}
+```
