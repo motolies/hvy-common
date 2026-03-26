@@ -147,6 +147,8 @@ dependencies {
     // logging
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     api 'io.micrometer:micrometer-tracing-bridge-brave:1.4.3'
+    api 'net.logstash.logback:logstash-logback-encoder:8.0'
+    api 'io.zipkin.reporter2:zipkin-reporter-brave'
 
     // implementation 대신 api를 사용하면 다른 모듈에서도 사용 가능
     // tsid
