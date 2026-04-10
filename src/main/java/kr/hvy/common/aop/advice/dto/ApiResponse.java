@@ -1,5 +1,6 @@
 package kr.hvy.common.aop.advice.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import kr.hvy.common.core.code.ApiResponseStatus;
 import lombok.Builder;
@@ -17,5 +18,6 @@ public class ApiResponse<T> {
   @NonNull
   private ApiResponseStatus status;
   private String message;
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private T data;
 }
