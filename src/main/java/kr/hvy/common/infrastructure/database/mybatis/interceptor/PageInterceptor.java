@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 import kr.hvy.common.application.domain.dto.paging.OrderBy;
 import kr.hvy.common.application.domain.dto.paging.PageRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,10 @@ import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
     )
 })
 public class PageInterceptor implements Interceptor {
+
+  // ORDER BY 컬럼명 허용 패턴: 식별자(table.column) 형태만 허용한다.
+  // 공백/따옴표/괄호/세미콜론/주석/서브쿼리 등을 차단하여 ORDER BY SQL 인젝션을 방지한다.
+  private static final Pattern SAFE_COLUMN = Pattern.compile("^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)?$");
 
 
   @Override
@@ -118,7 +123,10 @@ public class PageInterceptor implements Interceptor {
       modifiedSql.append("\n").append("ORDER BY ");
       for (int i = 0; i < orderByList.size(); i++) {
         OrderBy order = orderByList.get(i);
-        modifiedSql.append(order.getColumn());
+        String column = order.getColumn();
+        // 컬럼명을 SQL에 직접 결합하므로 화이트리스트 패턴으로 검증한다(인젝션 방지).
+        assertSafeColumn(column);
+        modifiedSql.append(column);
         if (order.getDirection() != null) {
           modifiedSql.append(" ").append(order.getDirection().getCode());
         }
@@ -126,6 +134,14 @@ public class PageInterceptor implements Interceptor {
           modifiedSql.append(", ");
         }
       }
+    }
+  }
+
+  // ORDER BY 컬럼명을 SQL 에 직접 결합하기 전에 화이트리스트 패턴으로 검증한다.
+  // 식별자(table.column) 형태만 허용하고, 그 외(공백/따옴표/괄호/세미콜론/주석/서브쿼리/함수 등)는 인젝션 차단을 위해 거부한다.
+  static void assertSafeColumn(String column) {
+    if (column == null || !SAFE_COLUMN.matcher(column).matches()) {
+      throw new IllegalArgumentException("유효하지 않은 정렬 컬럼입니다: " + column);
     }
   }
 

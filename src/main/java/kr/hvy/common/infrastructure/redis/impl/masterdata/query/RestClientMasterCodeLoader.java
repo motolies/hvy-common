@@ -13,12 +13,16 @@ import org.springframework.web.client.RestClient;
  * blog-back REST API 를 호출하여 마스터코드를 조회하는 {@link MasterCodeLoader} 구현.
  * <p>
  * 소비 앱은 이 빈을 그대로 등록하고 {@link MasterCodeClientProperties} 만 설정하면 된다.
- * 엔드포인트 규약(blog-back {@code MasterCodeController}):
+ * 엔드포인트 규약(blog-back {@code AdminMasterCodeController}, {@code /api/codes/admin}):
  * <ul>
- *   <li>GET {base}/api/v1/codes/tree</li>
- *   <li>GET {base}/api/v1/codes/tree/{rootCode}</li>
- *   <li>GET {base}/api/v1/codes/tree/{rootCode}/flat</li>
+ *   <li>GET {base}/api/codes/admin/tree</li>
+ *   <li>GET {base}/api/codes/admin/tree/{rootCode}</li>
+ *   <li>GET {base}/api/codes/admin/tree/{rootCode}/flat</li>
  * </ul>
+ * <p>
+ * 소비 앱은 원본(민감 attribute 포함) 데이터를 캐시에 적재하므로 sanitize 되지 않는 admin 경로를 사용한다.
+ * 따라서 {@code apiKey} 는 반드시 ROLE_ADMIN 권한을 가진 토큰이어야 한다
+ * (admin 경로는 SecurityConfig 의 {@code /api/{module}/admin} 규칙으로 ROLE_ADMIN 인가가 강제됨).
  * <p>
  * 실패 시 예외를 그대로 전파한다. 회로차단/재시도는 소비 앱에서 필요 시 상위에 추가.
  */
@@ -51,7 +55,7 @@ public class RestClientMasterCodeLoader implements MasterCodeLoader {
   @Override
   public List<MasterCodeTreeResponse> loadFullTree() {
     return restClient.get()
-        .uri("/api/v1/codes/tree")
+        .uri("/api/codes/admin/tree")
         .retrieve()
         .body(TREE_LIST);
   }
@@ -59,7 +63,7 @@ public class RestClientMasterCodeLoader implements MasterCodeLoader {
   @Override
   public List<MasterCodeTreeResponse> loadSubTree(String rootCode) {
     return restClient.get()
-        .uri("/api/v1/codes/tree/{rootCode}", rootCode)
+        .uri("/api/codes/admin/tree/{rootCode}", rootCode)
         .retrieve()
         .body(TREE_LIST);
   }
@@ -67,7 +71,7 @@ public class RestClientMasterCodeLoader implements MasterCodeLoader {
   @Override
   public List<MasterCodeResponse> loadChildren(String rootCode) {
     return restClient.get()
-        .uri("/api/v1/codes/tree/{rootCode}/flat", rootCode)
+        .uri("/api/codes/admin/tree/{rootCode}/flat", rootCode)
         .retrieve()
         .body(RESPONSE_LIST);
   }
