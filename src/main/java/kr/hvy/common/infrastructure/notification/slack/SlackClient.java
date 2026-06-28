@@ -1,5 +1,7 @@
 package kr.hvy.common.infrastructure.notification.slack;
 
+import brave.Span;
+import brave.Tracer;
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
 public class SlackClient implements Notify {
 
   private final SlackProperty slackProperty;
+  private final Tracer tracer;
   private MethodsClient client;
 
   @PostConstruct
@@ -35,6 +38,7 @@ public class SlackClient implements Notify {
           .channel(request.getChannel())
           .notify(request.isNotify())
           .exception(request.getException())
+          .traceId(resolveTraceId())
           .build();
     } else {
       message = SimpleTextMessage.builder()
@@ -55,6 +59,12 @@ public class SlackClient implements Notify {
         .attachments(message.toAttachments())
         .build();
     send(request);
+  }
+
+  // 현재 trace span에서 traceId 추출, 없으면 "-" 반환 (스케줄러/비요청 컨텍스트 대비 null-safe)
+  private String resolveTraceId() {
+    Span span = tracer.currentSpan();
+    return (span != null) ? span.context().traceIdString() : "-";
   }
 
   private void send(ChatPostMessageRequest request) {

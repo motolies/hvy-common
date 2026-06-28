@@ -7,7 +7,8 @@ import static com.slack.api.model.block.composition.BlockCompositions.plainText;
 
 import com.slack.api.model.Attachment;
 import com.slack.api.model.block.LayoutBlock;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +22,7 @@ import lombok.Getter;
 public class ErrorMessage implements SlackMessage {
 
   private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+  private static final ZoneId KST = ZoneId.of("Asia/Seoul");
   private static final int MAX_HEADER_LENGTH = 150;
 
   private final String channel;
@@ -29,6 +31,8 @@ public class ErrorMessage implements SlackMessage {
   private final Exception exception;
   @Builder.Default
   private final String environment = "";
+  @Builder.Default
+  private final String traceId = "-";
 
   @Override
   public boolean isNotify() {
@@ -57,10 +61,14 @@ public class ErrorMessage implements SlackMessage {
     }
     blocks.add(header(h -> h.text(plainText(truncate(headerText, MAX_HEADER_LENGTH)))));
 
-    String contextText = String.format("*환경* %s  |  *발생시간* %s",
+    String contextText = String.format("*환경* %s  |  *발생시간(KST)* %s",
         environment.isEmpty() ? "-" : environment,
-        LocalDateTime.now().format(TIME_FORMAT));
+        ZonedDateTime.now(KST).format(TIME_FORMAT));
     blocks.add(section(s -> s.text(markdownText(contextText))));
+
+    // traceId는 로그/Zipkin 추적 연결용. 비요청 컨텍스트 등으로 비어 있으면 "-" 표기
+    String tid = (traceId == null || traceId.isEmpty()) ? "-" : traceId;
+    blocks.add(section(s -> s.text(markdownText(String.format("*TraceId* `%s`", tid)))));
 
     blocks.add(section(s -> s.fields(Arrays.asList(
         markdownText(String.format("*Package* %s", packageName)),
