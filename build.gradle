@@ -37,7 +37,10 @@ tasks.withType(Javadoc) {
 
 // Maven Publishing 블록 설정
 mavenPublishing {
-    signAllPublications() // Gpg 서명을 위한 설정
+    // 서명 키가 있는 환경(로컬)에서만 서명 — CI(GH Packages 배포)에는 GPG 키가 없으므로 서명 생략
+    if (project.hasProperty('signing.keyId')) {
+        signAllPublications() // Gpg 서명을 위한 설정
+    }
     publishToMavenCentral(true) // Central Portal + 자동 릴리스
 
     coordinates("io.github.motolies", "hvy-common", version as String) // 네임 스페이스, 라이브러리 이름, 버전 순서로 작성
@@ -81,6 +84,21 @@ mavenPublishing {
             connection = 'scm:git:github.com/motolies/hvy-common.git'
             developerConnection = 'scm:git:ssh://github.com:motolies/hvy-common.git'
             url = '<https://github.com/motolies/hvy-common/tree/master>'
+        }
+    }
+}
+
+// GitHub Packages 배포 대상 — Central 동기화 지연 없이 즉시 소비 가능
+// 배포: ./gradlew publishAllPublicationsToGitHubPackagesRepository -PpublishVersion=X.Y.Z
+publishing {
+    repositories {
+        maven {
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/motolies/hvy-common')
+            credentials {
+                username = project.findProperty('gpr.user') ?: System.getenv('GHP_USER')
+                password = project.findProperty('gpr.key') ?: System.getenv('GHP_TOKEN')
+            }
         }
     }
 }

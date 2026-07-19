@@ -53,6 +53,17 @@ publishVersion=1.0.0
 
 ## 3. Build And Publish
 
+### 3.0 릴리스 절차 요약
+Maven Central은 배포 후 동기화가 느릴 수 있으므로, hvy-blog 등 내부 소비자는 **GitHub Packages**(즉시 반영)를 우선 사용한다.
+
+```shell
+# 1) master에 커밋 후 버전 태그 push → GitHub Actions가 GH Packages에 자동 배포 (즉시 반영)
+git tag X.Y.Z && git push origin X.Y.Z
+
+# 2) Maven Central 배포 (외부 소비자용, 동기화에 시간 걸릴 수 있음 — 로컬에서 수동, GPG 서명 포함)
+./gradlew publishAllPublicationsToMavenCentralRepository -PpublishVersion=X.Y.Z
+```
+
 ### 3.1 Maven Central 배포
 `publishToMavenCentral(true)` 설정으로 자동 릴리스가 활성화되어 있으므로,
 배포 후 Maven Central 사이트에서 별도로 Publish 버튼을 누를 필요 없이 자동으로 릴리스된다.
@@ -63,6 +74,25 @@ publishVersion=1.0.0
 # 아래처럼 버전을 추가해야 한다
 ./gradlew publishAllPublicationsToMavenCentralRepository -PpublishVersion=1.0.0
 ```
+
+### 3.1.1 GitHub Packages 배포
+`.github/workflows/publish-gh-packages.yml` 워크플로우가 master에 포함된 커밋의 버전 태그(`X.Y.Z`) push를 감지해
+`GITHUB_TOKEN`으로 자동 배포한다 (PAT 불필요).
+
+수동 배포가 필요하면 PAT(`write:packages` 스코프)를 `gradle.properties`에 설정 후 실행한다:
+```properties
+# gradle.properties (gitignore됨)
+gpr.user=motolies
+gpr.key=ghp_xxxxxxxxxxxx
+```
+```shell
+./gradlew publishAllPublicationsToGitHubPackagesRepository -PpublishVersion=X.Y.Z
+```
+
+참고:
+- GPG 서명은 `signing.keyId` 프로퍼티가 있을 때만 수행된다 (CI 배포분은 미서명, 로컬 Central 배포분은 서명).
+- GH Packages는 **public 패키지도 읽기에 토큰이 필요**하다. 소비 측(hvy-blog)은 `GHP_USER`/`GHP_TOKEN` 환경변수
+  또는 `gpr.user`/`gpr.key` 프로퍼티가 있을 때만 GH Packages 저장소를 등록하고, 없으면 mavenCentral로 폴백한다.
 
 ### 3.2 버전 관리
 `gradle.properties` 파일을 사용한다.
