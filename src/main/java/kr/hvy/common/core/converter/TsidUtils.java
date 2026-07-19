@@ -1,8 +1,7 @@
 package kr.hvy.common.core.converter;
 
 import io.hypersistence.tsid.TSID;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.Instant;
 
 public class TsidUtils {
 
@@ -22,16 +21,17 @@ public class TsidUtils {
     return TSID.from(tsid);
   }
 
-  public static LocalDateTime getLocalDateTime(Long tsid) {
-    return getTsid(tsid).getInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+  // TSID 생성 시각을 절대시각(Instant)으로 반환 — JVM 타임존에 의존하지 않는다
+  public static Instant getInstant(Long tsid) {
+    return getTsid(tsid).getInstant();
   }
 
-  public static LocalDateTime getLocalDateTime(String tsid) {
-    return getTsid(tsid).getInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+  public static Instant getInstant(String tsid) {
+    return getTsid(tsid).getInstant();
   }
 
-  public static LocalDateTime getLocalDateTime(TSID tsid) {
-    return tsid.getInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+  public static Instant getInstant(TSID tsid) {
+    return tsid.getInstant();
   }
 
 }

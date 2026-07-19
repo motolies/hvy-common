@@ -1,7 +1,7 @@
 package kr.hvy.common.aop.advice.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import kr.hvy.common.core.code.ApiResponseStatus;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import lombok.With;
 @With
 public class ApiResponse<T> {
 
-  private final LocalDateTime timestamp = LocalDateTime.now();
+  private final Instant timestamp = Instant.now();
   private String path;
   @NonNull
   private ApiResponseStatus status;

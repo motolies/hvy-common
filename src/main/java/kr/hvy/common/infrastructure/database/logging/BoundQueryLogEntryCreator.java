@@ -171,6 +171,16 @@ public class BoundQueryLogEntryCreator extends DefaultQueryLogEntryCreator {
       return "'" + ((java.time.LocalTime) value).format(DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSS")) + "'";
     }
 
+    // Instant: ISO-8601 UTC 표기 그대로 (timestamptz 컬럼 파라미터 재현용)
+    if (value instanceof java.time.Instant) {
+      return "'" + value + "'";
+    }
+
+    // OffsetDateTime / ZonedDateTime: 오프셋 포함 ISO 표기
+    if (value instanceof java.time.OffsetDateTime || value instanceof java.time.ZonedDateTime) {
+      return "'" + value + "'";
+    }
+
     // java.sql.Date: 'yyyy-MM-dd' 형식
     if (value instanceof java.sql.Date) {
       return "'" + new SimpleDateFormat("yyyy-MM-dd").format((java.sql.Date) value) + "'";

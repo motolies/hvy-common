@@ -6,8 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Optional;
 import kr.hvy.common.aop.logging.dto.ApiLogCreate;
 import kr.hvy.common.aop.logging.service.ApiLogService;
@@ -56,8 +55,7 @@ public class ApiLogInterceptor implements ClientHttpRequestInterceptor {
           new String(body, StandardCharsets.UTF_8));
     }
 
-    LocalDateTime requestTime = LocalDateTime.now();
-    ZonedDateTime start = ZonedDateTime.now();
+    Instant requestTime = Instant.now();
 
     try {
       ClientHttpResponse originResponse = execution.execute(request, body);
@@ -66,7 +64,7 @@ public class ApiLogInterceptor implements ClientHttpRequestInterceptor {
       throw e;
     } finally {
       try {
-        long duration = Duration.between(start, ZonedDateTime.now()).toMillis();
+        long duration = Duration.between(requestTime, Instant.now()).toMillis();
 
         if (ApplicationContextUtils.isDefaultProfileOnly()) {
           log.info("""

@@ -1,6 +1,6 @@
 package kr.hvy.common.infrastructure.redis.impl.masterdata.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;
@@ -28,9 +28,9 @@ public class MasterCodeResponse {
   Long parentId;
   Integer sort;
   Boolean isActive;
-  LocalDateTime createdAt;
+  Instant createdAt;
   String createdBy;
-  LocalDateTime updatedAt;
+  Instant updatedAt;
   String updatedBy;
   Integer childCount;
 }

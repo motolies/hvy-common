@@ -6,8 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import kr.hvy.common.aop.logging.dto.SystemLogCreate;
@@ -41,8 +40,7 @@ public class SystemLogAspect {
 
   @Around("controllerPointcut()")
   public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
-    LocalDateTime requestTime = LocalDateTime.now();
-    ZonedDateTime start = ZonedDateTime.now();
+    Instant requestTime = Instant.now();
 
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
         .getRequest();
@@ -59,16 +57,18 @@ public class SystemLogAspect {
         .created(EventLog.builder()
             .at(requestTime)
             .by(SecurityUtils.getUsername())
-            .build())
-        .processTime(Duration.between(start, ZonedDateTime.now()).toMillis());
+            .build());
 
+    // processTime은 proceed() 완료 후 계산해야 실제 처리시간이 기록된다
     Object result = null;
     try {
       result = joinPoint.proceed();
     } catch (Throwable e) {
+      builder.processTime(Duration.between(requestTime, Instant.now()).toMillis());
       systemLogAsyncService.saveAsync(builder, e);
       throw e;
     }
+    builder.processTime(Duration.between(requestTime, Instant.now()).toMillis());
     systemLogAsyncService.saveAsync(builder, result);
     return result;
   }

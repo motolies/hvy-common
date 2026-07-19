@@ -1,6 +1,6 @@
 package kr.hvy.common.aop.logging.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import kr.hvy.common.aop.logging.dto.SystemLogCreate;
 import kr.hvy.common.aop.logging.entity.SystemLog;
 import kr.hvy.common.aop.logging.repository.SystemLogRepository;
@@ -23,7 +23,7 @@ public class SystemLogService {
   }
 
   @Transactional
-  public int deleteLogsOlderThan(LocalDateTime cutoffDate) {
+  public int deleteLogsOlderThan(Instant cutoffDate) {
     return systemLogRepository.deleteByCreatedAtBefore(cutoffDate);
   }
 

@@ -1,7 +1,7 @@
 package kr.hvy.common.application.domain.embeddable;
 
 import jakarta.persistence.Embeddable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import kr.hvy.common.core.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,20 +15,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EventLogEntity {
 
-  private LocalDateTime at;
+  // 절대시각(UTC 기준 Instant) — JVM 타임존에 의존하지 않는다
+  private Instant at;
   private String by;
 
   // 기본값을 설정하는 메서드
   public static EventLogEntity defaultValues() {
     return EventLogEntity.builder()
-        .at(LocalDateTime.now())
+        .at(Instant.now())
         .by(SecurityUtils.getUsername())
         .build();
   }
 
   // 업데이트 메서드
   public EventLogEntity updated() {
-    this.at = LocalDateTime.now();
+    this.at = Instant.now();
     return this;
   }
 }

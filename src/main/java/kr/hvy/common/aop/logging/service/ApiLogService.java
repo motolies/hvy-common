@@ -1,6 +1,6 @@
 package kr.hvy.common.aop.logging.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import kr.hvy.common.aop.logging.dto.ApiLogCreate;
 import kr.hvy.common.aop.logging.entity.ApiLog;
 import kr.hvy.common.aop.logging.repository.ApiLogRepository;
@@ -24,7 +24,7 @@ public class ApiLogService {
   }
 
   @Transactional
-  public int deleteLogsOlderThan(LocalDateTime cutoffDate) {
+  public int deleteLogsOlderThan(Instant cutoffDate) {
     return apiLogRepository.deleteByCreatedAtBefore(cutoffDate);
   }
 

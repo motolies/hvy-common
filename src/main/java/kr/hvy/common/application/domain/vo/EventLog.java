@@ -1,7 +1,7 @@
 package kr.hvy.common.application.domain.vo;
 
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import kr.hvy.common.core.security.SecurityUtils;
 import lombok.Builder;
 import lombok.Value;
@@ -13,14 +13,14 @@ import lombok.With;
 public class EventLog {
 
   @Builder.Default
-  LocalDateTime at = LocalDateTime.now();
+  Instant at = Instant.now();
 
   @Builder.Default
   String by = "SYSTEM";
 
   public static EventLog defaultValues() {
     return EventLog.builder()
-        .at(LocalDateTime.now())
+        .at(Instant.now())
         .by(SecurityUtils.getUsername())
         .build();
   }
