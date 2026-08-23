@@ -6,14 +6,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import brave.Tracing;
+import io.micrometer.tracing.test.simple.SimpleTracer;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import kr.hvy.common.aop.logging.dto.ApiLogCreate;
 import kr.hvy.common.aop.logging.service.ApiLogService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,19 +30,14 @@ class ApiLogInterceptorTest {
 
   private static final URI TARGET_URI = URI.create("http://chromium:3000/content?stealth=true");
 
-  private Tracing tracing;
+  private SimpleTracer tracer;
   private ApiLogService apiLogService;
 
   @BeforeEach
   void setUp() {
-    // TraceContext 가 final 이라 mock 대신 실제 Tracer 를 쓴다
-    tracing = Tracing.newBuilder().build();
+    // 벤더 중립 테스트 픽스처 — scope 를 열지 않으면 currentSpan() 이 null 이라 span-없음 계약 검증에 그대로 쓸 수 있다
+    tracer = new SimpleTracer();
     apiLogService = mock(ApiLogService.class);
-  }
-
-  @AfterEach
-  void tearDown() {
-    tracing.close();
   }
 
   /**
@@ -51,7 +45,7 @@ class ApiLogInterceptorTest {
    */
   private ApiLogInterceptor newInterceptor(int maxBodyBytes) {
     ApiLogInterceptor interceptor = new ApiLogInterceptor(
-        tracing.tracer(), Optional.of(apiLogService), Optional.empty(), Optional.empty());
+        tracer, Optional.of(apiLogService), Optional.empty(), Optional.empty());
     return maxBodyBytes == ApiLogInterceptor.UNLIMITED_BODY_BYTES
         ? interceptor
         : interceptor.withMaxBodyBytes(maxBodyBytes);
@@ -193,7 +187,7 @@ class ApiLogInterceptorTest {
     @DisplayName("ApiLogService 가 없어도 응답을 정상 반환한다")
     void 서비스없음_응답정상반환() throws IOException {
       ApiLogInterceptor interceptor = new ApiLogInterceptor(
-          tracing.tracer(), Optional.empty(), Optional.empty(), Optional.empty());
+          tracer, Optional.empty(), Optional.empty(), Optional.empty());
 
       ClientHttpResponse response = interceptor.intercept(
           new MockClientHttpRequest(HttpMethod.POST, TARGET_URI),
@@ -209,7 +203,7 @@ class ApiLogInterceptorTest {
   @DisplayName("withMaxBodyBytes 는 원본 인스턴스를 변경하지 않는다")
   void withMaxBodyBytes_원본불변() throws IOException {
     ApiLogInterceptor origin = new ApiLogInterceptor(
-        tracing.tracer(), Optional.of(apiLogService), Optional.empty(), Optional.empty());
+        tracer, Optional.of(apiLogService), Optional.empty(), Optional.empty());
     ApiLogInterceptor limited = origin.withMaxBodyBytes(10);
 
     assertThat(limited).isNotSameAs(origin);

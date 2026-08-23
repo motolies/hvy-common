@@ -1,7 +1,7 @@
 package kr.hvy.common.infrastructure.client.rest.Interceptor;
 
-import brave.Span;
-import brave.Tracer;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -128,8 +128,8 @@ public class ApiLogInterceptor implements ClientHttpRequestInterceptor {
       Span currentSpan = tracer.currentSpan();
 
       ApiLogCreate apiLogCreate = ApiLogCreate.builder()
-          .traceId(currentSpan != null ? currentSpan.context().traceIdString() : null)
-          .spanId(currentSpan != null ? currentSpan.context().spanIdString() : null)
+          .traceId(currentSpan != null ? currentSpan.context().traceId() : null)
+          .spanId(currentSpan != null ? currentSpan.context().spanId() : null)
           .requestUri(String.valueOf(request.getURI()))
           .httpMethodType(String.valueOf(request.getMethod()))
           .requestHeader(String.valueOf(request.getHeaders()))

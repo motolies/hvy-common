@@ -1,6 +1,7 @@
 package kr.hvy.common.aop.logging;
 
-import brave.Tracer;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,9 +46,12 @@ public class SystemLogAspect {
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
         .getRequest();
 
+    // OTel 브리지는 트레이스 컨텍스트가 없으면 currentSpan()이 null 을 반환한다 (Brave 와 다름)
+    Span currentSpan = tracer.currentSpan();
+
     SystemLogCreate.SystemLogCreateBuilder builder = SystemLogCreate.builder()
-        .traceId(tracer.currentSpan().context().traceIdString())
-        .spanId(tracer.currentSpan().context().spanIdString())
+        .traceId(currentSpan != null ? currentSpan.context().traceId() : null)
+        .spanId(currentSpan != null ? currentSpan.context().spanId() : null)
         .requestUri(request.getRequestURI())
         .controllerName(joinPoint.getSignature().getDeclaringTypeName())
         .methodName(joinPoint.getSignature().getName())

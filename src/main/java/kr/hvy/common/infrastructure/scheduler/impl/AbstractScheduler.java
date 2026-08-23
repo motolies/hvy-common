@@ -1,7 +1,7 @@
 package kr.hvy.common.infrastructure.scheduler.impl;
 
-import brave.Span;
-import brave.Tracer;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
 import java.util.Objects;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Slf4j
 public abstract class AbstractScheduler {
 
-  // brave.Tracer — 하위 스케줄러 생성자 변경을 피하기 위해 추상 베이스에 필드 주입
+  // 벤더 중립 micrometer Tracer — 하위 스케줄러 생성자 변경을 피하기 위해 추상 베이스에 필드 주입
   @Autowired
   private Tracer tracer;
 
@@ -36,7 +36,7 @@ public abstract class AbstractScheduler {
     return schedulerRunnable -> {
       // 스케줄러 경계에서 새 trace span을 생성 → 스케줄러 로그(%X{traceId})와 Slack 오류 알림이 동일 traceId 공유
       Span span = tracer.nextSpan().name("scheduler." + logMsg);
-      try (Tracer.SpanInScope ws = tracer.withSpanInScope(span.start())) {
+      try (Tracer.SpanInScope ws = tracer.withSpan(span.start())) {
         StopWatch stopWatch = StopWatch.createStarted();
         log.info("### Scheduler." + logMsg + " start ###");
         setupToken();
@@ -52,7 +52,7 @@ public abstract class AbstractScheduler {
         stopWatch.stop();
         log.info("### Scheduler." + logMsg + " end : {} sec ###", stopWatch);
       } finally {
-        span.finish();
+        span.end();
       }
     };
   }

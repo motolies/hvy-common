@@ -1,7 +1,7 @@
 package kr.hvy.common.infrastructure.notification.slack;
 
-import brave.Span;
-import brave.Tracer;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
@@ -64,7 +64,7 @@ public class SlackClient implements Notify {
   // 현재 trace span에서 traceId 추출, 없으면 "-" 반환 (스케줄러/비요청 컨텍스트 대비 null-safe)
   private String resolveTraceId() {
     Span span = tracer.currentSpan();
-    return (span != null) ? span.context().traceIdString() : "-";
+    return (span != null) ? span.context().traceId() : "-";
   }
 
   private void send(ChatPostMessageRequest request) {
