@@ -163,10 +163,8 @@ public MasterCodeResponse updateNode(Long id, MasterCodeUpdate dto) {
 ### 4.1 의존성
 
 ```gradle
-implementation('io.github.motolies:hvy-common:<version>') {
-  exclude group: 'org.springframework.cloud', module: 'spring-cloud-stream'
-  exclude group: 'org.springframework.cloud', module: 'spring-cloud-stream-binder-kafka'
-}
+// 0.3.0+ (Spring Boot 4 / Jackson 3) — Kafka/Spring Cloud Stream 모듈이 제거되어 exclude 가 필요 없다
+implementation 'io.github.motolies:hvy-common:<version>'
 ```
 
 ### 4.2 application.yml

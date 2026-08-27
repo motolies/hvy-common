@@ -2,8 +2,6 @@ package kr.hvy.common.aop.logging;
 
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
@@ -24,6 +22,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Aspect
@@ -115,7 +115,7 @@ public class SystemLogAspect {
       objectMapper.writeValueAsString(param);
       // 성공하면 원본 객체 반환 (나중에 전체 Map과 함께 직렬화됨)
       return param;
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       // 직렬화 실패 시 toString()으로 폴백
       log.debug("Cannot serialize parameter of type {}: {}", param.getClass().getName(), e.getMessage());
       return param.toString();
@@ -125,7 +125,7 @@ public class SystemLogAspect {
   private String writeValueAsString(Object object) {
     try {
       return objectMapper.writeValueAsString(object);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       log.error("SystemLogAspect: {}", e.getMessage(), e);
       return "Can not converter data.";
     }

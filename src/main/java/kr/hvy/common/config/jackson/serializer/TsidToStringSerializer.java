@@ -1,15 +1,17 @@
 package kr.hvy.common.config.jackson.serializer;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import java.io.IOException;
 import kr.hvy.common.core.converter.TsidUtils;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-public class TsidToStringSerializer extends JsonSerializer<Long> {
+/**
+ * TSID(long) 를 Crockford Base32 문자열로 직렬화한다 (Jackson 3: JsonSerializer → ValueSerializer, IOException 없음)
+ */
+public class TsidToStringSerializer extends ValueSerializer<Long> {
 
   @Override
-  public void serialize(Long value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+  public void serialize(Long value, JsonGenerator gen, SerializationContext ctxt) {
     if (value == null) {
       gen.writeNull();
     } else {

@@ -1,7 +1,5 @@
 package kr.hvy.common.aop.advice;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -19,7 +17,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,6 +26,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,8 +39,8 @@ public abstract class ResponseWrapperConfigure extends ResponseEntityExceptionHa
 
   @Override
   public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-    // MappingJackson2HttpMessageConverter를 사용하는 경우에만 적용합니다.
-    return MappingJackson2HttpMessageConverter.class.isAssignableFrom(converterType);
+    // Jackson(3) 계열 컨버터에만 적용합니다 — Boot 4 는 JacksonJsonHttpMessageConverter(부모: AbstractJacksonHttpMessageConverter)를 등록합니다.
+    return AbstractJacksonHttpMessageConverter.class.isAssignableFrom(converterType);
   }
 
   @Override
@@ -61,7 +61,7 @@ public abstract class ResponseWrapperConfigure extends ResponseEntityExceptionHa
             .path(path)
             .data(body)
             .build());
-      } catch (JsonProcessingException e) {
+      } catch (JacksonException e) {
         throw new RuntimeException("JSON 변환 중 오류 발생", e);
       }
     }

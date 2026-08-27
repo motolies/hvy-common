@@ -1,8 +1,5 @@
 package kr.hvy.common.config.cache;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +15,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * L1(Caffeine) + L2(Redis) 2단계 캐시 설정 베이스 클래스
@@ -48,22 +46,11 @@ public class TwoTierCacheConfigurer {
   @Autowired(required = false)
   private CacheInvalidationPublisher publisher;
 
-  private static final ObjectMapper objectMapper = createL2ObjectMapper();
-
   /**
-   * L2(Redis) 직렬화용 ObjectMapper
-   * EVERYTHING default typing을 사용하여 타입 정보를 JSON에 포함시킵니다.
-   * 이를 통해 역직렬화 시 LinkedHashMap이 아닌 원래 타입으로 복원됩니다.
+   * L2(Redis) 직렬화용 ObjectMapper — EVERYTHING default typing 으로 원래 타입 복원
+   * (Jackson 3 매퍼는 불변이라 빌더 단계에서 확정된 ObjectMapperConfigurer.getL2ObjectMapper() 를 사용)
    */
-  private static ObjectMapper createL2ObjectMapper() {
-    ObjectMapper mapper = ObjectMapperConfigurer.getObjectMapper();
-    mapper.activateDefaultTyping(
-        LaissezFaireSubTypeValidator.instance,
-        ObjectMapper.DefaultTyping.EVERYTHING,
-        JsonTypeInfo.As.PROPERTY
-    );
-    return mapper;
-  }
+  private static final ObjectMapper objectMapper = ObjectMapperConfigurer.getL2ObjectMapper();
 
   private final Map<String, TwoTierCache> cacheRegistry = new ConcurrentHashMap<>();
 

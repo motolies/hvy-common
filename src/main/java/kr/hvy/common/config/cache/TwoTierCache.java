@@ -1,7 +1,5 @@
 package kr.hvy.common.config.cache;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import kr.hvy.common.infrastructure.redis.cache.CacheInvalidationPublisher;
@@ -9,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RMapCache;
 import org.springframework.cache.Cache;
 import org.springframework.cache.caffeine.CaffeineCache;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * L1(Caffeine) + L2(Redis) 2단계 캐시 구현체
@@ -190,7 +190,7 @@ public class TwoTierCache implements Cache {
     try {
       String json = objectMapper.writeValueAsString(value);
       l2.put(key, json, props.l2Ttl().toMillis(), TimeUnit.MILLISECONDS);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       log.warn("L2 cache serialize failed, key={}: {}", key, e.getMessage());
     } catch (Exception e) {
       log.warn("L2 cache write failed, key={}: {}", key, e.getMessage());
@@ -218,7 +218,7 @@ public class TwoTierCache implements Cache {
   private Object deserialize(String json) {
     try {
       return objectMapper.readValue(json, Object.class);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       log.warn("L2 cache deserialize failed: {}", e.getMessage());
       return null;
     }
@@ -228,7 +228,7 @@ public class TwoTierCache implements Cache {
   private <T> T deserialize(String json, Class<T> type) {
     try {
       return objectMapper.readValue(json, type);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       log.warn("L2 cache deserialize failed for type {}: {}", type.getSimpleName(), e.getMessage());
       return null;
     }

@@ -1,7 +1,5 @@
 package kr.hvy.common.aop.logging;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.hvy.common.aop.logging.dto.SystemLogCreate;
 import kr.hvy.common.aop.logging.service.SystemLogService;
 import kr.hvy.common.core.code.ApiResponseStatus;
@@ -10,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Component
@@ -33,7 +33,7 @@ public class SystemLogAsyncService {
   private String writeValueAsString(Object object) {
     try {
       return objectMapper.writeValueAsString(object);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       log.error("SystemLogAsyncSaver: {}", e.getMessage(), e);
       return "Can not converter data.";
     }

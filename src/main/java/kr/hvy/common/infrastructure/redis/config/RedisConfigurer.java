@@ -6,13 +6,13 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.Codec;
 import org.redisson.config.Config;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.context.annotation.Bean;
 
 @RequiredArgsConstructor
 public class RedisConfigurer {
 
-  private final RedisProperties redisProperties;
+  private final DataRedisProperties redisProperties;
 
   @Bean(destroyMethod = "shutdown")
   public RedissonClient redissonClient() {
