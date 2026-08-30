@@ -155,15 +155,15 @@ dependencies {
 
     // logging
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    // Boot 4 는 actuator 스타터가 트레이싱 auto-config 를 끌어오지 않는다 → OTel 브리지 + Zipkin 내보내기 auto-config 모듈 명시
+    // Boot 4 는 actuator 스타터가 트레이싱 auto-config 를 끌어오지 않는다 → OTel 브리지 auto-config 모듈을 명시한다
     implementation 'org.springframework.boot:spring-boot-micrometer-tracing-opentelemetry'
-    implementation 'org.springframework.boot:spring-boot-zipkin'
     // 벤더 중립 facade(io.micrometer.tracing.Tracer)만 코드에서 사용한다 — 브리지 교체 시 코드 무변경.
     // api 인 이유: ApiLogInterceptor public 생성자가 Tracer 타입을 노출하므로 소비 모듈 컴파일에 필요
     // (위 모듈 안에서는 optional 의존이라 명시하지 않으면 Tracer 빈이 생성되지 않는다)
     api 'io.micrometer:micrometer-tracing-bridge-otel'
-    // Zipkin 전송 구현체 — management.tracing.export.zipkin.endpoint 설정을 그대로 사용한다 (버전은 Boot BOM 위임)
-    implementation 'io.opentelemetry:opentelemetry-exporter-zipkin'
+    // ⚠️ span 을 내보내는 exporter 는 일부러 없다. traceId 는 로그 상관관계(tb_system_log.trace_id)와
+    //    Slack 오류 알림, 프론트와의 W3C traceparent 연결에만 쓰고 외부 트레이싱 서버로는 보내지 않는다.
+    //    exporter 가 없어도 traceId 는 정상 생성된다 — 내보낼 곳이 생기면 그때 exporter 만 추가하면 된다.
     api 'net.logstash.logback:logstash-logback-encoder:9.0'   // 9.0 부터 Jackson 3 기반
 
     // implementation 대신 api를 사용하면 다른 모듈에서도 사용 가능

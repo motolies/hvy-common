@@ -66,7 +66,7 @@ public class ErrorMessage implements SlackMessage {
         ZonedDateTime.now(KST).format(TIME_FORMAT));
     blocks.add(section(s -> s.text(markdownText(contextText))));
 
-    // traceId는 로그/Zipkin 추적 연결용. 비요청 컨텍스트 등으로 비어 있으면 "-" 표기
+    // traceId는 로그 상관관계(tb_system_log.trace_id·Loki) 연결용. 비요청 컨텍스트 등으로 비어 있으면 "-" 표기
     String tid = (traceId == null || traceId.isEmpty()) ? "-" : traceId;
     blocks.add(section(s -> s.text(markdownText(String.format("*TraceId* `%s`", tid)))));
 
