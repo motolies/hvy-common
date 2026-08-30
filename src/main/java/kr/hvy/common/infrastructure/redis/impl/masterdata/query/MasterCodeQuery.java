@@ -45,14 +45,20 @@ public class MasterCodeQuery {
 
   /**
    * 루트 코드별 서브트리 조회.
+   * <p>
+   * ⚠️ 빈 결과는 캐시 히트로 보지도, 캐시에 쓰지도 않는다({@link #getFullTree()} 와 같은 규약).
+   * 예전에는 {@code cached != null} 로 판정해 빈 리스트도 히트였는데, 그 때문에 데이터가 있는데도
+   * 일시적으로 0건이 나온 경우(예: 시드 시 path 백필 누락)의 {@code []} 가 L2 TTL(1일) 동안
+   * 눌러앉아 "DB 를 고쳤는데도 화면이 그대로"인 상황을 만들었다. 빈 서브트리를 매번 다시 읽는
+   * 비용보다 잘못된 빈 값이 하루 고착되는 위험이 훨씬 크다.
    */
   public List<MasterCodeTreeResponse> getSubTree(String rootCode) {
     List<MasterCodeTreeResponse> cached = cache.getSubTree(rootCode);
-    if (cached != null) {
+    if (!CollectionUtils.isEmpty(cached)) {
       return cached;
     }
     List<MasterCodeTreeResponse> loaded = loader.loadSubTree(rootCode);
-    if (loaded != null) {
+    if (!CollectionUtils.isEmpty(loaded)) {
       cache.putSubTree(rootCode, loaded);
     }
     return loaded;
@@ -60,14 +66,16 @@ public class MasterCodeQuery {
 
   /**
    * 루트의 직계 자식 플랫 목록 조회.
+   * <p>
+   * 빈 결과 처리 규약은 {@link #getSubTree(String)} 와 같다.
    */
   public List<MasterCodeResponse> getChildren(String rootCode) {
     List<MasterCodeResponse> cached = cache.getChildren(rootCode);
-    if (cached != null) {
+    if (!CollectionUtils.isEmpty(cached)) {
       return cached;
     }
     List<MasterCodeResponse> loaded = loader.loadChildren(rootCode);
-    if (loaded != null) {
+    if (!CollectionUtils.isEmpty(loaded)) {
       cache.putChildren(rootCode, loaded);
     }
     return loaded;

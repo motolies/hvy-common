@@ -18,14 +18,19 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class MasterCodeResponse {
 
-  Long id;
+  /**
+   * TSID 문자열(Crockford Base32 13자). 0.3.1 에서 {@code Long} 에서 바뀌었다.
+   * <p>
+   * TSID 는 2^60 이상이라 JS Number(안전 범위 2^53)로는 무손실 표현이 불가능하다.
+   */
+  String id;
   String code;
   String name;
   String description;
   Map<String, Object> attributes;
   List<Map<String, String>> attributeSchema;
   Integer depth;
-  Long parentId;
+  String parentId;
   Integer sort;
   Boolean isActive;
   Instant createdAt;
