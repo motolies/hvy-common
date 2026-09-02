@@ -23,7 +23,7 @@ class ObjectMapperConfigurerTest {
    */
   private static MasterCodeResponse sample() {
     return MasterCodeResponse.builder()
-        .id(1L)
+        .id("1")
         .code("FAVORITE")
         .name("즐겨찾기")
         .attributes(new HashMap<>(Map.of("color", "red")))
