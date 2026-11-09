@@ -16,11 +16,11 @@ public class DataSourceProxySettingProperty {
   // 슬로우 쿼리 임계치 (ms)
   private long slowQueryThreshold = 1000; // 예: 1000ms 이상이면 slow query로 간주
 
-  // ResultSet 로깅 설정
+  // ResultSet 로깅 설정 (GFM 마크다운 표)
   private boolean enableResultSetLogging = false; // ResultSet 테이블 로깅 활성화
-  private int maxResultSetRows = Integer.MAX_VALUE; // 최대 표시 행 수 (무제한)
+  private int maxResultSetRows = Integer.MAX_VALUE; // 최대 표시 행 수 (무제한, 초과분은 개수만 센다)
   private int maxResultSetColumns = Integer.MAX_VALUE; // 최대 표시 컬럼 수 (무제한)
-  private int maxColumnValueLength = Integer.MAX_VALUE; // 컬럼 값 최대 표시 길이 (무제한)
+  private int maxColumnValueLength = Integer.MAX_VALUE; // 셀 값 최대 문자 수(UTF-16, 한글도 1자), 초과 시 앞부분 + "..." (무제한)
 
   // SQL 파라미터 인라인 로깅 설정
   private int maxParamValueLength = 500; // PreparedStatement 파라미터 인라인 시 문자열 값 최대 길이

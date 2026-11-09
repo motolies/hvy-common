@@ -173,6 +173,12 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     // SimpleTracer — 실제 트레이싱 SDK 없이 Tracer 계약을 테스트한다 (버전은 Boot BOM 위임)
     testImplementation 'io.micrometer:micrometer-tracing-test'
+    // SQL 결과표 마크다운 셀이 GFM 파서를 거쳐도 원래 값으로 보이는지 확인하는 왕복 테스트용
+    testImplementation 'org.commonmark:commonmark:0.31.0'
+    testImplementation 'org.commonmark:commonmark-ext-gfm-tables:0.31.0'
+    testImplementation 'org.commonmark:commonmark-ext-gfm-strikethrough:0.31.0'
+    // datasource-proxy ResultSet 프록시 실제 경로 통합 테스트용 인메모리 DB (버전은 Boot BOM 위임)
+    testImplementation 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // lombok
