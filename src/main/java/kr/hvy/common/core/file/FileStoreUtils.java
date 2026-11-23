@@ -2,9 +2,11 @@ package kr.hvy.common.core.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,6 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileStoreUtils {
 
   /**
+   * 업로드 파일을 {uploadPath}/{그룹}/{postId}/{UUID}.{확장자} 로 스트림 복사해 저장한다.
+   * 파일 전체를 메모리에 올리지 않으므로 업로드 한도(max-file-size)가 힙보다 커도 안전하다.
+   *
    * @return 생성된 파일 명(유일한 값)
    * @throws IllegalStateException
    * @throws IOException
@@ -37,7 +42,11 @@ public class FileStoreUtils {
 
     File target = new File(uploadPath + savePath, saveFileName);
 
-    FileCopyUtils.copy(file.getBytes(), target);
+    // getBytes() 는 파일 크기만큼 byte[] 를 힙에 한 번에 할당한다(400MB 업로드 → 힙 OOM, 2026-11-23).
+    // 컨테이너가 디스크에 받아 둔 임시 파일을 스트림으로 복사해 힙 사용을 버퍼 크기로 묶는다.
+    try (InputStream in = file.getInputStream()) {
+      Files.copy(in, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
 
     String returnPath = makeFilePath(uploadPath, savePath, saveFileName);
     return returnPath.replaceFirst("^/", "");
